@@ -3142,9 +3142,10 @@ function runAutoMoves() {
 // --- Camp joué par le MOTEUR (`moduleRules.autoMoveSide` — les Japonais à
 // la mer de Corail, le joueur ayant les Alliés) : à chacun de ses pas, il
 // fait ses déplacements automatiques (phase de Mouvement, cf.
-// `runAutoMoves`) puis rend la main de lui-même, comme si son joueur avait
-// cliqué "suivant" (cf. onPhaseNext). Le joueur humain ne voit ainsi que
-// ses propres phases. Une seule fois par pas ; jamais pendant un rejeu ;
+// `runAutoMoves`) et désigne ses reconnaissances (cf.
+// `continueEngineRecon`). Il ne passe JAMAIS la phase lui-même : c'est le
+// joueur qui clique "suivant" (cf. onPhaseNext), une fois qu'il a vu ce
+// que le moteur a fait. Une seule fois par pas ; jamais pendant un rejeu ;
 // en ligne, seulement chez le joueur de ce camp, s'il y en a un.
 let engineStepPlayed = null
 function playEngineStep() {
@@ -3171,7 +3172,7 @@ watch([phase, () => turnInfo.value.step, () => turnInfo.value.activeSideKey, isR
 //     de ses cibles (surlignée sur la carte), et attend : le joueur ouvre le
 //     "Rapport de reconnaissance" d'un clic droit sur une unité de cet hex
 //     (cf. `reportRecon`). Puis la source suivante ; quand il n'en reste
-//     plus, le moteur rend la main.
+//     plus, le joueur passe la phase ("suivant").
 //   - Camp du JOUEUR (`moduleRules.manualReconSide`) : il clique une source
 //     (surlignée), puis une cible à sa portée (cf. `onManualRecon`). Le chit
 //     tiré lui reste caché — un pion "Search" générique le remplace sur la
@@ -3198,12 +3199,12 @@ function reconPhaseOf(side) {
 /** Checks que le camp `side` peut encore faire : sources qui ont un check
  *  et au moins une cible. */
 function openReconChecks(side) {
-  return (moduleRules.reconChecks(counters.value, side) ?? [])
+  return (moduleRules.reconChecks(counters.value, side, turnTrackerRef.value?.currentStep) ?? [])
     .filter((check) => check.targets.length && reconUsesOf(check.source.key) < check.source.checks)
 }
 
-/** Désigne le prochain hex à explorer, ou rend la main s'il n'y en a plus
- *  (ou si la tasse de recherche est vide). */
+/** Désigne le prochain hex à explorer — aucun s'il n'y en a plus (ou si
+ *  la tasse de recherche est vide) : le joueur passe alors la phase. */
 function continueEngineRecon() {
   reconTarget.value = null
   if (reconPhaseOf(moduleRules.autoMoveSide) && searchBagLeft()) {
@@ -3211,10 +3212,8 @@ function continueEngineRecon() {
     if (checks.length) {
       const check = checks[Math.floor(Math.random() * checks.length)]
       reconTarget.value = { ...check.targets[Math.floor(Math.random() * check.targets.length)], source: check.source }
-      return
     }
   }
-  onPhaseNext()
 }
 
 // --- Reconnaissance du joueur : source choisie (clé), en attente de cible.
@@ -3256,11 +3255,19 @@ function onManualRecon(hex, clicked = null) {
 
 /** Pion de résultat de recherche (cf. `moduleRules.searchResults`), posé
  *  sur l'unité `unit`, qu'il suivra (`attachedTo`, cf. `syncSearchMarkers`).
- *  `hidden` : pion "Search" générique, le vrai chit restant caché. */
+ *  `hidden` : pion "Search" générique, le vrai chit restant caché. `step` :
+ *  pas de la piste où il a été tiré (cf. `moduleRules.reconChecks`). */
 function searchMarker(result, unit, hidden) {
   const look = moduleRules.searchResults?.[hidden ? 'hidden' : result]
   return { id: `search-${newUid()}`, name: look?.name ?? result, code: look?.name ?? result, type: 'marker',
-    faction: 'markers', src: look?.src, col: unit.col, row: unit.row, searchResult: result, attachedTo: String(unit.id) }
+    faction: 'markers', src: look?.src, col: unit.col, row: unit.row, searchResult: result, attachedTo: String(unit.id),
+    step: turnTrackerRef.value?.currentStep ?? null }
+}
+
+/** Pose le résultat de recherche `marker` sur son unité, à la place de
+ *  celui d'une phase précédente — en jeu comme au rejeu. */
+function placeSearchMarker(marker) {
+  counters.value = [...counters.value.filter((counter) => !(counter.searchResult && counter.attachedTo === marker.attachedTo)), { ...marker }]
 }
 
 /** Pion "Sighted" de l'état de repérage `sighting`, posé sur l'unité `unit`
@@ -3301,7 +3308,7 @@ function performSearch(unit, source, { hidden = false } = {}) {
   const draw = moduleRules.drawSearch()
   if (!draw) return false
   const marker = searchMarker(draw.result, unit, hidden)
-  counters.value.push(marker)
+  placeSearchMarker(marker)
   noteReconUse(source.key)
   const outcome = moduleRules.searchOutcome(draw.result, unit) ?? { sighting: null, removed: false }
   const sighted = outcome.sighting ? sightedMarker(outcome.sighting, unit) : null
@@ -3865,7 +3872,7 @@ function applyReplayEntry(entry) {
     // Résultat de recherche (cf. `reportRecon`) : le pion tiré, et ce qui
     // reste dans la tasse — le journal fait foi, jamais un nouveau tirage.
     if (entryData.counter && !counters.value.some((counter) => String(counter.id) === String(entryData.counter.id))) {
-      counters.value.push({ ...entryData.counter })
+      placeSearchMarker(entryData.counter)
     }
     moduleRules.restoreSearchBag(entryData.bag)
     if (entryData.source) noteReconUse(entryData.source)

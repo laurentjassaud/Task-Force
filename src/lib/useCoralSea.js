@@ -256,12 +256,15 @@ export function useCoralSea(moduleId, ctx = {}) {
   /** Checks de reconnaissance possibles du camp `side` (japonais par
    *  défaut) : pour chaque source, les hex (`{ col, row }`) qu'elle peut
    *  explorer — une cible (cf. `reconTargetOf`) s'y trouve, à 8 hex ou
-   *  moins, et aucun résultat de recherche n'y est déjà posé (une même
-   *  source n'explore donc jamais deux fois le même hex). `[{ source,
+   *  moins, et aucun résultat de recherche n'y a été posé PENDANT CETTE
+   *  PHASE (`step`, pas de la piste noté sur le pion — un hex marqué à une
+   *  phase précédente peut être exploré à nouveau ; une même source
+   *  n'explore jamais deux fois le même hex dans la phase). `[{ source,
    *  targets }]`, sources sans cible comprises ; `null` hors mer de Corail. */
-  function reconChecks(counters, side = 'ijn') {
+  function reconChecks(counters, side = 'ijn', step = null) {
     if (!active.value) return null
-    const searched = new Set(counters.filter((counter) => counter.searchResult).map((counter) => counter.col + ',' + counter.row))
+    const searched = new Set(counters.filter((counter) => counter.searchResult && counter.step === step)
+      .map((counter) => counter.col + ',' + counter.row))
     const enemies = new Map()
     for (const counter of counters) {
       if (!reconTargetOf(counter, side)) continue

@@ -65,9 +65,10 @@ export const INERT_RULES = Object.freeze({
   /** Phase (id de `turnStructure.phases`) où `autoMoveSide` fait ses
    *  reconnaissances, ou `null` (pas de reconnaissance du moteur). */
   reconPhase: null,
-  /** Checks de reconnaissance du camp donné : chaque source (`{ key, base,
-   *  name, unitId, checks, col, row }`) explore jusqu'à `checks` de ses hex
-   *  par phase (`[{ source, targets: [{ col, row }] }]`), ou `null`. */
+  /** Checks de reconnaissance du camp donné, au pas de piste donné : chaque
+   *  source (`{ key, base, name, unitId, checks, col, row }`) explore
+   *  jusqu'à `checks` de ses hex par phase (`[{ source, targets: [{ col,
+   *  row }] }]`), ou `null`. */
   reconChecks: () => null,
   /** Ce pion est-il une cible de reconnaissance pour ce camp ? */
   reconTargetOf: () => false,
