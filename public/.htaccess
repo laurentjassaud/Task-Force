@@ -1,0 +1,21 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # --- Proxy vers le serveur Node (PORT=8080) pour l'API et Socket.IO ---
+  # Nécessite mod_proxy, mod_proxy_http et mod_proxy_wstunnel.
+  <IfModule mod_proxy.c>
+    # WebSocket (upgrade Socket.IO)
+    RewriteCond %{HTTP:Upgrade} =websocket [NC]
+    RewriteRule ^socket\.io/(.*)$ ws://127.0.0.1:8080/socket.io/$1 [P,L]
+
+    # Polling Socket.IO + API REST
+    RewriteRule ^(api|socket\.io)/(.*)$ http://127.0.0.1:8080/$1/$2 [P,L]
+  </IfModule>
+
+  # --- Fallback SPA (vue-router en mode history) ---
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>

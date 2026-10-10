@@ -1,0 +1,1271 @@
+{
+  "boardGame": "Battle of the Coral Sea",
+  "name": "Battle of the Coral Sea, May 7-8, 1942",
+  "favicon": "/modules/coral-sea/favicon.ico",
+  "i18n": {
+    "en": {
+      "Japonais": "Japanese",
+      "Américains": "Americans",
+      "Historique": "Historical",
+      "Renfort japonais": "Japanese reinforcements",
+      "Renfort américains": "American reinforcements",
+      "Mouvement naval": "Naval Movement",
+      "Combat naval": "Naval Combat",
+      "Opérations aériennes": "Air Operations",
+      "Reconnaissance": "Reconnaissance",
+      "Administrative": "Administrative",
+      "Nuit": "Night",
+      "Premier jour": "First Day",
+      "Deuxième jour": "Second Day",
+      "Mouvement": "Movement",
+      "Mouvement AK": "AK Movement",
+      "Raid aérien & CAP": "Air Raid & CAP",
+      "Chits de reco. utilisés": "Rec. Chits Used",
+      "Organisation des flottes": "Fleet Arrangement",
+      "2 hex": "2 hexes",
+      "1 hex": "1 hex",
+      "Tous les navires": "All ships",
+      "Participation restreinte": "Restricted participation",
+      "Tous rendus": "Return all",
+      "Ne retournent pas dans la tasse": "Do not return to cup",
+      "Diviser, fusionner, réorganiser, réutiliser les leurres": "Split, merge, rearrange & reuse dummies",
+      "Fusionner et réorganiser les flottes": "Merge and rearrange fleets",
+      "Mise en place US": "US setup"
+    }
+  },
+  "map": {
+    "url": "/modules/coral-sea/images/coral-sea-map.jpg",
+    "imageWidth": 4315,
+    "imageHeight": 3169,
+    "cols": 33,
+    "rows": 19,
+    "orientation": "flat-top",
+    "evenColShift": "+rowStep/2",
+    "evenColMinus": true,
+    "removedHexes": "",
+    "calibration": {
+      "x0": 278,
+      "y0": 272,
+      "colStep": 117.3,
+      "a": 78.2,
+      "rowStep": 135.3
+    }
+  },
+  "terrain": {
+    "ijnArrivalHexes": [
+      "0117", "0118", "0119", "0217", "0218", "0317", "0318", "0319", "0417", "0418", "0517", "0518",
+      "0519", "0617", "0618", "0711", "0712", "0713", "0714", "0715", "0717", "0718", "0719", "0810",
+      "0811", "0812", "0813", "0814", "0815", "0816", "0817", "0818", "0910", "0911", "0912", "0913",
+      "0914", "0915", "0916", "0917", "0918", "0919", "1009", "1010", "1011", "1012", "1013", "1014",
+      "1015", "1016", "1017", "1018", "1109", "1110", "1111", "1112", "1113", "1114", "1115", "1116",
+      "1117", "1118", "1119", "1208", "1209", "1210", "1211", "1212", "1213", "1214", "1215", "1216",
+      "1217", "1218", "1308", "1309", "1310", "1311", "1312", "1313", "1314", "1315", "1316", "1317",
+      "1318", "1319", "1408", "1409", "1410", "1411", "1412", "1413", "1414", "1415", "1416", "1417",
+      "1418", "1509", "1510", "1511", "1512", "1513", "1514", "1515", "1516", "1517", "1518", "1519",
+      "1609", "1610", "1611", "1612", "1613", "1614", "1615", "1616", "1617", "1618", "1710", "1711",
+      "1712", "1713", "1714", "1715", "1716", "1717", "1718", "1719", "1810", "1811", "1812", "1813",
+      "1814", "1815", "1816", "1817", "1818", "1912", "1913", "1914", "1915", "1916", "1917", "1918",
+      "1919", "2012", "2013", "2014", "2015", "2016", "2017", "2018"
+    ],
+    "seaBarriers": [
+      "0105-0106",
+      "0113-0114",
+      "0114-0115",
+      "0114-0214",
+      "0115-0116",
+      "0116-0117",
+      "0116-0215",
+      "0117-0216",
+      "0210-0311",
+      "0211-0212",
+      "0211-0311",
+      "0211-0312",
+      "0215-0216",
+      "0215-0316",
+      "0216-0217",
+      "0216-0317",
+      "0310-0311",
+      "0310-0410",
+      "0311-0312",
+      "0311-0410",
+      "0311-0411",
+      "0315-0316",
+      "0315-0415",
+      "0316-0317",
+      "0317-0416",
+      "0317-0417",
+      "0404-0405",
+      "0407-0508",
+      "0408-0508",
+      "0408-0509",
+      "0409-0410",
+      "0409-0509",
+      "0409-0510",
+      "0410-0411",
+      "0410-0510",
+      "0410-0511",
+      "0414-0415",
+      "0415-0515",
+      "0416-0417",
+      "0416-0517",
+      "0417-0517",
+      "0506-0507",
+      "0507-0508",
+      "0507-0606",
+      "0507-0607",
+      "0508-0509",
+      "0508-0607",
+      "0508-0608",
+      "0509-0510",
+      "0509-0609",
+      "0515-0516",
+      "0516-0517",
+      "0516-0615",
+      "0517-0616",
+      "0517-0617",
+      "0604-0605",
+      "0605-0705",
+      "0615-0616",
+      "0615-0716",
+      "0616-0617",
+      "0616-0717",
+      "0712-0812",
+      "0715-0716",
+      "0716-0717",
+      "0716-0815",
+      "0716-0816",
+      "0811-0812",
+      "0814-0915",
+      "0815-0816",
+      "0815-0915",
+      "0815-0916",
+      "0915-0916",
+      "0915-1015",
+      "1013-1014",
+      "1014-1015",
+      "1015-1115",
+      "1015-1116",
+      "1104-1105",
+      "1105-1204",
+      "1111-1211",
+      "1112-1211",
+      "1115-1116",
+      "1115-1214",
+      "1115-1215",
+      "1204-1205",
+      "1204-1305",
+      "1210-1211",
+      "1214-1215",
+      "1214-1315",
+      "1304-1305",
+      "1314-1413",
+      "1314-1414",
+      "1403-1404",
+      "1403-1504",
+      "1412-1413",
+      "1413-1414",
+      "1413-1513",
+      "1413-1514",
+      "1503-1504",
+      "1504-1603",
+      "1513-1514",
+      "1513-1613",
+      "1514-1613",
+      "1612-1613",
+      "1612-1712",
+      "1613-1713",
+      "1705-1804",
+      "1802-1803",
+      "1803-1903",
+      "1804-1805",
+      "1903-1904",
+      "1903-2003",
+      "2002-2003",
+      "2201-2202",
+      "2202-2302",
+      "2203-2204",
+      "2203-2304",
+      "2302-2303",
+      "2303-2304",
+      "2503-2603",
+      "2506-2606",
+      "2602-2603",
+      "2706-2707",
+      "2707-2708",
+      "2707-2806",
+      "2707-2807"
+    ],
+    "seaPassages": {
+      "0105": {
+        "blue": [
+          "0105-0205"
+        ]
+      },
+      "0205": {
+        "green": [
+          "0106-0205"
+        ],
+        "blue": [
+          "0204-0205"
+        ]
+      },
+      "0206": {
+        "green": [
+          "0205-0206"
+        ]
+      },
+      "0305": {
+        "blue": [
+          "0204-0305",
+          "0304-0305"
+        ],
+        "green": [
+          "0205-0305",
+          "0305-0405"
+        ]
+      },
+      "0306": {
+        "green": [
+          "0205-0306",
+          "0305-0306"
+        ]
+      },
+      "0309": {
+        "green": [
+          "0309-0310"
+        ]
+      },
+      "0310": {
+        "blue": [
+          "0209-0310",
+          "0210-0310"
+        ],
+        "green": [
+          "0310-0409"
+        ]
+      },
+      "0404": {
+        "blue": [
+          "0305-0404",
+          "0404-0505"
+        ]
+      },
+      "0405": {
+        "green": [
+          "0405-0505"
+        ]
+      },
+      "0504": {
+        "blue": [
+          "0504-0505"
+        ]
+      },
+      "0505": {
+        "blue": [
+          "0505-0604"
+        ]
+      },
+      "0506": {
+        "green": [
+          "0505-0506"
+        ]
+      },
+      "0605": {
+        "green": [
+          "0505-0605"
+        ]
+      }
+    },
+    "edges": {
+      "layers": {
+        "seaBarriers": "barrier"
+      },
+      "passages": "seaPassages",
+      "kinds": {
+        "barrier": {
+          "impassable": true,
+          "blocksZoc": true,
+          "blocksAttack": true
+        }
+      },
+      "movementPriority": [
+        "barrier"
+      ]
+    }
+  },
+  "sides": {
+    "ijn": [
+      "ijn",
+      "markers"
+    ],
+    "usn": [
+      "usn",
+      "markers"
+    ]
+  },
+  "turnTrack": {
+    "turns": 24,
+    "interleaved": true,
+    "order": [
+      "ijn",
+      "usn"
+    ],
+    "setup": {
+      "side": "usn",
+      "label": "Mise en place US",
+      "short": "MEP"
+    },
+    "sides": {
+      "ijn": {
+        "label": "Japonais",
+        "marker": "/modules/coral-sea/images/Marker_Game Turn-IJN.png",
+        "color": "#c8553d"
+      },
+      "usn": {
+        "label": "Américains",
+        "marker": "/modules/coral-sea/images/Marker_Game Turn-USN.png",
+        "color": "#6f9ccf"
+      }
+    },
+    "periods": [
+      {
+        "label": "Nuit",
+        "from": 1,
+        "to": 2,
+        "style": "night"
+      },
+      {
+        "label": "Premier jour",
+        "from": 3,
+        "to": 10,
+        "style": "day"
+      },
+      {
+        "label": "Nuit",
+        "from": 11,
+        "to": 12,
+        "style": "night"
+      },
+      {
+        "label": "Nuit",
+        "from": 13,
+        "to": 14,
+        "style": "night"
+      },
+      {
+        "label": "Deuxième jour",
+        "from": 15,
+        "to": 22,
+        "style": "day"
+      },
+      {
+        "label": "Nuit",
+        "from": 23,
+        "to": 24,
+        "style": "night"
+      }
+    ],
+    "conditions": [
+      {
+        "id": "movement",
+        "label": "Mouvement"
+      },
+      {
+        "id": "akMovement",
+        "label": "Mouvement AK"
+      },
+      {
+        "id": "navalCombat",
+        "label": "Combat naval"
+      },
+      {
+        "id": "airRaid",
+        "label": "Raid aérien & CAP"
+      },
+      {
+        "id": "recon",
+        "label": "Reconnaissance"
+      },
+      {
+        "id": "reconChits",
+        "label": "Chits de reco. utilisés"
+      },
+      {
+        "id": "fleet",
+        "label": "Organisation des flottes"
+      }
+    ],
+    "turnInfo": [
+      {
+        "time": "0000",
+        "initiative": "ijn",
+        "movement": 2,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "2 hex",
+          "akMovement": true,
+          "navalCombat": "Tous les navires",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Tous rendus",
+          "fleet": "Diviser, fusionner, réorganiser, réutiliser les leurres"
+        }
+      },
+      {
+        "time": "0300",
+        "initiative": "usn",
+        "movement": 2,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "2 hex",
+          "akMovement": true,
+          "navalCombat": "Tous les navires",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Tous rendus",
+          "fleet": "Diviser, fusionner, réorganiser, réutiliser les leurres"
+        }
+      },
+      {
+        "time": "0600",
+        "initiative": "ijn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": true,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "0730",
+        "initiative": "usn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": false,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "0900",
+        "initiative": "ijn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": true,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1030",
+        "initiative": "usn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": false,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1200",
+        "initiative": "ijn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": true,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1330",
+        "initiative": "usn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": false,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1500",
+        "initiative": "ijn",
+        "movement": 1,
+        "skipPhases": [
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": true,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": false,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1630",
+        "initiative": "usn",
+        "movement": 1,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": false,
+          "navalCombat": "Participation restreinte",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1800",
+        "initiative": "ijn",
+        "movement": 2,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "2 hex",
+          "akMovement": true,
+          "navalCombat": "Tous les navires",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Tous rendus",
+          "fleet": "Diviser, fusionner, réorganiser, réutiliser les leurres"
+        }
+      },
+      {
+        "time": "2100",
+        "initiative": "usn",
+        "movement": 2,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "2 hex",
+          "akMovement": true,
+          "navalCombat": "Tous les navires",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Tous rendus",
+          "fleet": "Diviser, fusionner, réorganiser, réutiliser les leurres"
+        }
+      },
+      {
+        "time": "0000",
+        "initiative": "ijn",
+        "movement": 2,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "2 hex",
+          "akMovement": true,
+          "navalCombat": "Tous les navires",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Tous rendus",
+          "fleet": "Diviser, fusionner, réorganiser, réutiliser les leurres"
+        }
+      },
+      {
+        "time": "0300",
+        "initiative": "usn",
+        "movement": 2,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "2 hex",
+          "akMovement": true,
+          "navalCombat": "Tous les navires",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Tous rendus",
+          "fleet": "Diviser, fusionner, réorganiser, réutiliser les leurres"
+        }
+      },
+      {
+        "time": "0600",
+        "initiative": "ijn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": true,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "0730",
+        "initiative": "usn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": false,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "0900",
+        "initiative": "ijn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": true,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1030",
+        "initiative": "usn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": false,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1200",
+        "initiative": "ijn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": true,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1330",
+        "initiative": "usn",
+        "movement": 1,
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": false,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": true,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1500",
+        "initiative": "ijn",
+        "movement": 1,
+        "skipPhases": [
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": true,
+          "navalCombat": "Participation restreinte",
+          "airRaid": true,
+          "recon": false,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1630",
+        "initiative": "usn",
+        "movement": 1,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "1 hex",
+          "akMovement": false,
+          "navalCombat": "Participation restreinte",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Ne retournent pas dans la tasse",
+          "fleet": "Fusionner et réorganiser les flottes"
+        }
+      },
+      {
+        "time": "1800",
+        "initiative": "ijn",
+        "movement": 2,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "2 hex",
+          "akMovement": true,
+          "navalCombat": "Tous les navires",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Tous rendus",
+          "fleet": "Diviser, fusionner, réorganiser, réutiliser les leurres"
+        }
+      },
+      {
+        "time": "2100",
+        "initiative": "usn",
+        "movement": 2,
+        "skipPhases": [
+          "airOperations",
+          "reconnaissance"
+        ],
+        "conditions": {
+          "movement": "2 hex",
+          "akMovement": true,
+          "navalCombat": "Tous les navires",
+          "airRaid": false,
+          "recon": false,
+          "reconChits": "Tous rendus",
+          "fleet": "Diviser, fusionner, réorganiser, réutiliser les leurres"
+        }
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "historique",
+      "label": "Historique",
+      "deployment": "setup"
+    }
+  ],
+  "turnStructure": {
+    "airbornePhase": false,
+    "combatPhase": false,
+    "endOfTurnPhase": false,
+    "phases": [
+      {
+        "id": "navalMovement",
+        "label": "Mouvement naval",
+        "kind": "movement"
+      },
+      {
+        "id": "navalCombat",
+        "label": "Combat naval",
+        "order": "roll"
+      },
+      {
+        "id": "airOperations",
+        "label": "Opérations aériennes"
+      },
+      {
+        "id": "reconnaissance",
+        "label": "Reconnaissance"
+      },
+      {
+        "id": "administrative",
+        "label": "Administrative"
+      }
+    ]
+  },
+  "rules": {
+    "stackingLimit": "none"
+  },
+  "counters": {
+    "ijn": [
+      {
+        "id": "ijn-tf1",
+        "name": "TF 1",
+        "code": "TF1",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_TF-1.png",
+        "turn": 1,
+        "setup": "0501-2701"
+      },
+      {
+        "id": "ijn-tf2",
+        "name": "TF 2",
+        "code": "TF2",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_TF-2.png",
+        "turn": 1,
+        "setup": "0501-2701"
+      },
+      {
+        "id": "ijn-tf3",
+        "name": "TF 3",
+        "code": "TF3",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_TF-3.png",
+        "turn": 1,
+        "setup": "0501-2701"
+      },
+      {
+        "id": "ijn-tf7",
+        "name": "TF 7",
+        "code": "TF7",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_TF-7.png",
+        "turn": 1,
+        "setup": "0501-2701"
+      },
+      {
+        "id": "ijn-tf8",
+        "name": "TF 8",
+        "code": "TF8",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_TF-8.png",
+        "turn": 1,
+        "setup": "0501-2701"
+      },
+      {
+        "id": "ijn-tf10",
+        "name": "TF 10",
+        "code": "TF10",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_TF-10.png",
+        "turn": 1,
+        "setup": "0501-2701"
+      },
+      {
+        "id": "ijn-dummy-1",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-2",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-3",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-4",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-5",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-6",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-7",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-8",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-9",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-10",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-11",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      },
+      {
+        "id": "ijn-dummy-12",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "ijn",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "turn": 1,
+        "setup": "0601-2701"
+      }
+    ],
+    "usn": [
+      {
+        "id": "usn-tf1",
+        "name": "TF 1",
+        "code": "TF1",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-1.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf2",
+        "name": "TF 2",
+        "code": "TF2",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-2.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf3",
+        "name": "TF 3",
+        "code": "TF3",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-3.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf4",
+        "name": "TF 4",
+        "code": "TF4",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-4.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf5",
+        "name": "TF 5",
+        "code": "TF5",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-5.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf6",
+        "name": "TF 6",
+        "code": "TF6",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-6.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf7",
+        "name": "TF 7",
+        "code": "TF7",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-7.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf8",
+        "name": "TF 8",
+        "code": "TF8",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-8.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf9",
+        "name": "TF 9",
+        "code": "TF9",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-9.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf10",
+        "name": "TF 10",
+        "code": "TF10",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-10.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf11",
+        "name": "TF 11",
+        "code": "TF11",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-11.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf12",
+        "name": "TF 12",
+        "code": "TF12",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-12.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-tf13",
+        "name": "TF 13",
+        "code": "TF13",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_TF-13.png",
+        "turn": 0,
+        "setup": "*"
+      },
+      {
+        "id": "usn-dummy",
+        "name": "Dummy",
+        "code": "Dummy",
+        "type": "task force",
+        "faction": "usn",
+        "src": "/modules/coral-sea/images/counters/usn/USN_Dummy.png",
+        "turn": 0,
+        "setup": "*",
+        "multiple": true
+      }
+    ],
+    "markers": [
+      {
+        "id": "mk-detected-1",
+        "name": "Detected!",
+        "code": "Detected!",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Detected.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-detected-2",
+        "name": "Detected!",
+        "code": "Detected!",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Detected.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-detected-3",
+        "name": "Detected!",
+        "code": "Detected!",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Detected.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-detected-4",
+        "name": "Detected!",
+        "code": "Detected!",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Detected.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-contact-lost-1",
+        "name": "Contact Lost",
+        "code": "Contact Lost",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Contact-Lost.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-contact-lost-2",
+        "name": "Contact Lost",
+        "code": "Contact Lost",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Contact-Lost.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-contact-lost-3",
+        "name": "Contact Lost",
+        "code": "Contact Lost",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Contact-Lost.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-contact-lost-4",
+        "name": "Contact Lost",
+        "code": "Contact Lost",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Contact-Lost.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-misdirect-1",
+        "name": "Misdirect",
+        "code": "Misdirect",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Misdirect.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-misdirect-2",
+        "name": "Misdirect",
+        "code": "Misdirect",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Misdirect.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-misdirect-3",
+        "name": "Misdirect",
+        "code": "Misdirect",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Misdirect.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      },
+      {
+        "id": "mk-misdirect-4",
+        "name": "Misdirect",
+        "code": "Misdirect",
+        "type": "marker",
+        "faction": "markers",
+        "src": "/modules/coral-sea/images/counters/markers/Marker_Misdirect.png",
+        "turn": 1,
+        "setup": "0101-3301"
+      }
+    ]
+  }
+}
