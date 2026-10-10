@@ -48,6 +48,7 @@ import SidePanel from './SidePanel.vue'
 import ReinforcementsPanel from './ReinforcementsPanel.vue'
 import EliminatedPanel from './EliminatedPanel.vue'
 import ContextMenu from './ContextMenu.vue'
+import Toast from './Toast.vue'
 import StackPopup from './StackPopup.vue'
 import RollModal from './RollModal.vue'
 import MovementChartModal from './MovementChartModal.vue'
@@ -2242,6 +2243,12 @@ function onCounterContextMenu(id, ev) {
     { label: t('menu.putBack'), action: () => returnCounterToReinforcements(id) },
     { label: t('menu.eliminate'), action: () => eliminateCounter(id) },
   ]
+  // Reconnaissance du moteur (cf. `reportRecon`) : sur une unité de l'hex
+  // qu'il a désigné, en tête du menu.
+  const onMap = counters.value.find((counter) => String(counter.id) === String(id))
+  if (onMap && isReconTargetHex({ c: onMap.col, r: onMap.row })) {
+    items.unshift({ label: t('menu.reconReport'), action: () => reportRecon(id) })
+  }
   // Phase Mouvement uniquement (ou partie Libre, sans phases : `phase` vaut
   // `null`) — même raison que "Retour arrière" (cf. `moveHistory`) : en phase
   // Combat, l'unité a pu combattre, retraiter ou avancer depuis.
@@ -2691,7 +2698,7 @@ const STACK_STEP = 0.1
 const stackOffsets = computed(() => {
   const hexKey = (counter) => counter.col + ',' + counter.row
   const stackAt = (idx) => ({ dx: -STACK_STEP * idx, dy: -STACK_STEP * idx })
-  const markerHexes = new Set(counters.value.filter((counter) => !isUnit(counter) && !isSupport(counter)).map(hexKey))
+  const markerHexes = new Set(counters.value.filter((counter) => !isUnit(counter) && !isSupport(counter) && !counter.attachedTo).map(hexKey))
   const unitCounts = new Map()
   const offsets = new Map()
   for (const counter of counters.value) {
@@ -2703,10 +2710,15 @@ const stackOffsets = computed(() => {
     offsets.set(counter.id, stackAt(stackBase + stackIndex))
   }
   // Une fois toutes les unités comptées, quel que soit l'ordre de `counters`.
+  // Les pions rattachés à une unité (résultat de recherche, "Sighted" — cf.
+  // `syncSearchMarkers`) montent chacun d'un cran de plus.
+  const attachedCounts = new Map()
   for (const counter of counters.value) {
-    if (!isSupport(counter)) continue
+    if (!isSupport(counter) && !counter.attachedTo) continue
     const key = hexKey(counter)
-    offsets.set(counter.id, stackAt((markerHexes.has(key) ? 1 : 0) + (unitCounts.get(key) ?? 0)))
+    const attachedIndex = counter.attachedTo ? (attachedCounts.get(key) ?? 0) : 0
+    if (counter.attachedTo) attachedCounts.set(key, attachedIndex + 1)
+    offsets.set(counter.id, stackAt((markerHexes.has(key) ? 1 : 0) + (unitCounts.get(key) ?? 0) + attachedIndex))
   }
   return offsets
 })
@@ -2851,6 +2863,9 @@ function onCounterSelect(id) {
   if (inputLocked.value) return
   const counter = counters.value.find((counter) => String(counter.id) === String(id))
   if (!counter) return
+  // Reconnaissance du joueur (cf. `onManualRecon`) : le clic choisit une
+  // source ou explore une cible, rien d'autre.
+  if (onManualRecon({ c: counter.col, r: counter.row }, counter)) return
   // Mode debug, phase de Fin de tour : le clic sert à REGARDER la ligne de
   // communication de cette unité (cf. la section du même nom), et rien
   // d'autre — y compris sur une unité que le camp actif ne contrôle pas.
@@ -2975,6 +2990,7 @@ function onMarkerClick(id) {
  *  journal chargé n'est pas entièrement joué. */
 const onHex = (hex) => {
   if (inputLocked.value) return
+  if (onManualRecon(hex)) return
   // Résultat de combat en cours d'application (cf. lib/useRetreat.js) :
   // seul un clic sur un hex rouge (retraite) ou vert vif (avance) fait
   // quelque chose ; tout le reste est ignoré jusqu'à la fin.
@@ -3140,9 +3156,211 @@ function playEngineStep() {
   if (engineStepPlayed === step) return
   engineStepPlayed = step
   if (phase.value === 0) runAutoMoves()
-  onPhaseNext()
+  continueEngineRecon()
 }
 watch([phase, () => turnInfo.value.step, () => turnInfo.value.activeSideKey, isReplaying], () => nextTick(playEngineStep))
+
+// --- Reconnaissance (`moduleRules.reconPhase` — cf. lib/useCoralSea.js) :
+// pendant cette phase, chaque SOURCE de reconnaissance du camp actif
+// (`moduleRules.reconChecks` — base aérienne, porte-avions) explore jusqu'à
+// `checks` hex différents de sa portée. Un chit est tiré de la tasse de
+// recherche, son pion posé sur l'unité explorée et son résultat appliqué
+// (cf. `performSearch`, entrée `search` du journal).
+//   - Camp du MOTEUR (`moduleRules.autoMoveSide`) : il tire une source au
+//     hasard parmi celles qui ont encore un check et une cible, puis l'une
+//     de ses cibles (surlignée sur la carte), et attend : le joueur ouvre le
+//     "Rapport de reconnaissance" d'un clic droit sur une unité de cet hex
+//     (cf. `reportRecon`). Puis la source suivante ; quand il n'en reste
+//     plus, le moteur rend la main.
+//   - Camp du JOUEUR (`moduleRules.manualReconSide`) : il clique une source
+//     (surlignée), puis une cible à sa portée (cf. `onManualRecon`). Le chit
+//     tiré lui reste caché — un pion "Search" générique le remplace sur la
+//     carte — et un toast lui dit ce que ses avions ont vu.
+const reconTarget = ref(null) // { col, row, source: { key, base, checks } } | null
+// Checks déjà faits par chaque source, sous la clé "pas:source" — le pas de
+// la piste, lu sur TurnTracker.vue (à jour tout de suite, même au rejeu),
+// suffit à les oublier à la phase suivante. Rétabli par les entrées `search`.
+const reconUses = ref(new Map())
+const reconUseKey = (key) => `${turnTrackerRef.value?.currentStep}:${key}`
+const reconUsesOf = (key) => reconUses.value.get(reconUseKey(key)) ?? 0
+function noteReconUse(key) {
+  reconUses.value = new Map(reconUses.value).set(reconUseKey(key), reconUsesOf(key) + 1)
+}
+const isReconTargetHex = (hex) => reconTarget.value?.col === hex.c && reconTarget.value?.row === hex.r
+const searchBagLeft = () => Object.values(moduleRules.searchBag?.value ?? {}).some((count) => count > 0)
+
+/** Le camp `side` est-il dans sa phase de reconnaissance ? */
+function reconPhaseOf(side) {
+  return !!moduleRules.reconPhase && !!side && turnInfo.value.activeSideKey === side
+    && turnTrackerRef.value?.currentSlot?.phase === moduleRules.reconPhase
+}
+
+/** Checks que le camp `side` peut encore faire : sources qui ont un check
+ *  et au moins une cible. */
+function openReconChecks(side) {
+  return (moduleRules.reconChecks(counters.value, side) ?? [])
+    .filter((check) => check.targets.length && reconUsesOf(check.source.key) < check.source.checks)
+}
+
+/** Désigne le prochain hex à explorer, ou rend la main s'il n'y en a plus
+ *  (ou si la tasse de recherche est vide). */
+function continueEngineRecon() {
+  reconTarget.value = null
+  if (reconPhaseOf(moduleRules.autoMoveSide) && searchBagLeft()) {
+    const checks = openReconChecks(moduleRules.autoMoveSide)
+    if (checks.length) {
+      const check = checks[Math.floor(Math.random() * checks.length)]
+      reconTarget.value = { ...check.targets[Math.floor(Math.random() * check.targets.length)], source: check.source }
+      return
+    }
+  }
+  onPhaseNext()
+}
+
+// --- Reconnaissance du joueur : source choisie (clé), en attente de cible.
+const manualReconSource = ref(null)
+watch(() => turnInfo.value.step, () => { reconTarget.value = null; manualReconSource.value = null })
+
+/** Phase de reconnaissance du camp joué à la main (mode Assisté). */
+const manualReconActive = computed(() => props.assisted && reconPhaseOf(moduleRules.manualReconSide))
+/** Checks encore possibles pour le joueur (cf. `openReconChecks`). */
+const manualReconChecks = computed(() => (manualReconActive.value && searchBagLeft()
+  ? openReconChecks(moduleRules.manualReconSide) : []))
+const manualReconCheck = computed(() => manualReconChecks.value.find((check) => check.source.key === manualReconSource.value) ?? null)
+const isManualReconSourceHex = (hex) => manualReconChecks.value.some((check) => check.source.col === hex.c && check.source.row === hex.r)
+const isManualReconChosenHex = (hex) => manualReconCheck.value?.source.col === hex.c && manualReconCheck.value?.source.row === hex.r
+const isManualReconTargetHex = (hex) => !!manualReconCheck.value?.targets.some((target) => target.col === hex.c && target.row === hex.r)
+
+/** Clic pendant la reconnaissance du joueur (sur un pion ou un hex) : une
+ *  source la choisit, une cible de la source choisie est explorée. Vrai si
+ *  le clic a été consommé. */
+function onManualRecon(hex, clicked = null) {
+  if (!manualReconActive.value) return false
+  const source = manualReconChecks.value.find((check) =>
+    (clicked && check.source.unitId === String(clicked.id)) || (!clicked && check.source.col === hex.c && check.source.row === hex.r))
+  if (source) {
+    manualReconSource.value = manualReconSource.value === source.source.key ? null : source.source.key
+    return true
+  }
+  const check = manualReconCheck.value
+  if (check && isManualReconTargetHex(hex)) {
+    const enemies = counters.value.filter((counter) => counter.col === hex.c && counter.row === hex.r
+      && moduleRules.reconTargetOf(counter, moduleRules.manualReconSide))
+    const unit = clicked && enemies.includes(clicked) ? clicked : enemies.at(-1)
+    if (unit) performSearch(unit, check.source, { hidden: true })
+    // Plus rien à faire pour cette source : elle se désélectionne.
+    if (!manualReconCheck.value) manualReconSource.value = null
+  }
+  return true
+}
+
+/** Pion de résultat de recherche (cf. `moduleRules.searchResults`), posé
+ *  sur l'unité `unit`, qu'il suivra (`attachedTo`, cf. `syncSearchMarkers`).
+ *  `hidden` : pion "Search" générique, le vrai chit restant caché. */
+function searchMarker(result, unit, hidden) {
+  const look = moduleRules.searchResults?.[hidden ? 'hidden' : result]
+  return { id: `search-${newUid()}`, name: look?.name ?? result, code: look?.name ?? result, type: 'marker',
+    faction: 'markers', src: look?.src, col: unit.col, row: unit.row, searchResult: result, attachedTo: String(unit.id) }
+}
+
+/** Pion "Sighted" de l'état de repérage `sighting`, posé sur l'unité `unit`
+ *  (cf. `moduleRules.sightings`, image selon le camp de l'unité), ou `null`
+ *  si cet état n'en pose pas. */
+function sightedMarker(sighting, unit) {
+  const look = moduleRules.sightings?.[sighting]
+  const src = look?.src?.[unit.faction] ?? Object.values(look?.src ?? {})[0]
+  if (!src) return null
+  return { id: `sighted-${newUid()}`, name: look.name, code: look.name, type: 'marker', faction: 'markers',
+    src, col: unit.col, row: unit.row, sighted: sighting, attachedTo: String(unit.id) }
+}
+
+// État de repérage de chaque unité explorée (cf. `moduleRules.searchOutcome`)
+// : id -> clé de `moduleRules.sightings` ("noContact", "carrierTF"...).
+// Rétabli au rejeu par les entrées `search`.
+const sightings = ref(new Map())
+
+/** Enregistre l'état de repérage d'une unité et remplace son pion
+ *  "Sighted" — en jeu comme au rejeu. */
+function applySighting(unitId, sighting, sighted) {
+  const key = String(unitId)
+  sightings.value = new Map(sightings.value).set(key, sighting)
+  counters.value = counters.value.filter((counter) => !(counter.sighted && counter.attachedTo === key))
+  if (sighted) counters.value.push({ ...sighted })
+}
+
+// Toast du résultat d'une reconnaissance du joueur (cf. Toast.vue).
+const reconToast = ref(null)
+
+/** Explore l'unité `unit` depuis la source `source` : tire un chit, pose son
+ *  pion sur l'unité, en applique le résultat (état de repérage, pion
+ *  "Sighted", leurre retiré du jeu) et l'inscrit au journal. `hidden` : le
+ *  chit reste caché au joueur (pion "Search", journal sans le chit ni le
+ *  contenu de la tasse), qui reçoit à la place un toast du résultat. Faux
+ *  si la tasse est vide. */
+function performSearch(unit, source, { hidden = false } = {}) {
+  const draw = moduleRules.drawSearch()
+  if (!draw) return false
+  const marker = searchMarker(draw.result, unit, hidden)
+  counters.value.push(marker)
+  noteReconUse(source.key)
+  const outcome = moduleRules.searchOutcome(draw.result, unit) ?? { sighting: null, removed: false }
+  const sighted = outcome.sighting ? sightedMarker(outcome.sighting, unit) : null
+  if (outcome.sighting) applySighting(unit.id, outcome.sighting, sighted)
+  const sightingLabel = outcome.sighting ? t(`sighting.${outcome.sighting}`) : '—'
+  // Un porte-avions du moteur reste anonyme : le nommer trahirait quel
+  // leurre le porte. Ceux du joueur sont à découvert.
+  const from = source.base ?? (hidden ? source.name : t('log.reconCarrier'))
+  const hex = hexId(unit.col + 1, unit.row)
+  const side = sideLabel(turnInfo.value.activeSideKey)
+  const { detected = 0, misdirect = 0, contactLost = 0 } = draw.bag
+  const text = hidden
+    ? t('log.searchHidden', { side, from, hex, unit: unit.name, sighting: sightingLabel })
+    : t('log.search', { side, from, hex, unit: unit.name, result: marker.name, sighting: sightingLabel, detected, misdirect, contactLost })
+  log('search', text, { counter: marker, bag: draw.bag, unitId: String(unit.id), sighting: outcome.sighting, sighted, source: source.key })
+  if (outcome.removed) eliminateCounter(unit.id, t('log.dummyUnmasked'))
+  if (hidden) {
+    reconToast.value = { id: marker.id, text: t(outcome.removed ? 'recon.toastRemoved' : 'recon.toast', { hex, sighting: sightingLabel }) }
+  }
+  return true
+}
+
+/** "Rapport de reconnaissance" du moteur sur l'unité `unitId` (clic droit) :
+ *  explore l'unité depuis la source désignée, puis passe à la suivante. */
+function reportRecon(unitId) {
+  const target = reconTarget.value
+  const unit = counters.value.find((counter) => String(counter.id) === String(unitId))
+  if (!target || !unit) return
+  performSearch(unit, target.source)
+  nextTick(continueEngineRecon)
+}
+
+// Un résultat de recherche SUIT son unité (`attachedTo`) : il en reprend
+// l'hex à chacun de ses déplacements — en jeu, en ligne comme au rejeu — et
+// quitte la carte avec elle (éliminée, replacée, sortie). Il ne reçoit
+// aucun clic (cf. `.search-marker`) : on sélectionne et déplace l'unité à
+// travers lui, comme s'il n'était pas là.
+function syncSearchMarkers() {
+  const byId = new Map(counters.value.map((counter) => [String(counter.id), counter]))
+  const orphaned = counters.value.some((counter) => counter.attachedTo && !byId.has(counter.attachedTo))
+  if (orphaned) counters.value = counters.value.filter((counter) => !counter.attachedTo || byId.has(counter.attachedTo))
+  for (const marker of counters.value) {
+    const unit = marker.attachedTo && byId.get(marker.attachedTo)
+    if (unit && (marker.col !== unit.col || marker.row !== unit.row)) { marker.col = unit.col; marker.row = unit.row }
+  }
+}
+watch(() => counters.value.filter((counter) => counter.attachedTo).map((marker) => {
+  const unit = counters.value.find((counter) => String(counter.id) === marker.attachedTo)
+  return unit ? `${unit.col},${unit.row}` : '-'
+}).join('|'), syncSearchMarkers)
+
+// Tours où les chits de recherche reviennent tous dans la tasse (piste de
+// tour, cf. `moduleRules.searchChitsReturn`) : leurs pions quittent la
+// carte. Déduit du seul tour : vaut aussi au rejeu, sans entrée de journal.
+watch(() => turnInfo.value.turn, () => {
+  if (!moduleRules.searchChitsReturn(turnTrackerRef.value?.currentTurnInfo)) return
+  moduleRules.refillSearchBag()
+  if (counters.value.some((counter) => counter.searchResult)) counters.value = counters.value.filter((counter) => !counter.searchResult)
+})
 
 // --- Ordre tiré au dé (piste à phases entremêlées, phase `"order": "roll"`
 // — cf. lib/turnTrack.js ; le Combat naval de la mer de Corail) : en
@@ -3465,6 +3683,11 @@ function resetBoardForReplay() {
   gameOverReason.value = null
   showGameEnd.value = false
   counters.value = buildInitialCounters()
+  // Tasse de recherche pleine, aucun repérage : rétablis par les entrées
+  // `search` rejouées.
+  moduleRules.refillSearchBag()
+  sightings.value = new Map()
+  reconUses.value = new Map()
   autoMoveTrails.value = new Map()
   eliminatedIds.value = new Set()
   // Sorties de carte (cf. la section du même nom) : rétablies par les entrées
@@ -3638,6 +3861,17 @@ function applyReplayEntry(entry) {
     if (counterIndex !== -1) counters.value.splice(counterIndex, 1)
     eliminatedIds.value.delete(String(entryData.counterId))
     eliminatedIds.value = new Set(eliminatedIds.value)
+  } else if (entry.kind === 'search') {
+    // Résultat de recherche (cf. `reportRecon`) : le pion tiré, et ce qui
+    // reste dans la tasse — le journal fait foi, jamais un nouveau tirage.
+    if (entryData.counter && !counters.value.some((counter) => String(counter.id) === String(entryData.counter.id))) {
+      counters.value.push({ ...entryData.counter })
+    }
+    moduleRules.restoreSearchBag(entryData.bag)
+    if (entryData.source) noteReconUse(entryData.source)
+    // État de repérage et pion "Sighted" (le leurre démasqué, lui, part
+    // avec l'entrée `eliminate` qui suit).
+    if (entryData.unitId && entryData.sighting) applySighting(entryData.unitId, entryData.sighting, entryData.sighted)
   } else if (entry.kind === 'rollOrder') {
     // Ordre de jeu d'une phase tirée au dé (cf. `rollPhaseOrder`).
     turnTrackerRef.value?.setRollOrder(entryData.turn, entryData.order)
@@ -4114,6 +4348,24 @@ function onMapDragEnd() {
             :points="hex.pts" vector-effect="non-scaling-stroke" />
         </g>
 
+        <!-- cf. la section "Reconnaissance du moteur" — hex que le moteur
+             vient de désigner : clic droit sur une de ses unités pour le
+             rapport. Purement informatif : les clics le traversent. -->
+        <g v-if="reconTarget">
+          <polygon v-for="hex in hexes.filter(isReconTargetHex)" :key="'recon' + hex.id" class="hex-recon-target"
+            :points="hex.pts" vector-effect="non-scaling-stroke" />
+        </g>
+        <!-- Reconnaissance du joueur : sources possibles (contour), source
+             choisie (plein) et ses cibles (jaune clignotant). Les clics
+             traversent jusqu'aux pions et aux hex (cf. `onManualRecon`). -->
+        <g v-if="manualReconChecks.length">
+          <polygon v-for="hex in hexes.filter(isManualReconSourceHex)" :key="'rsrc' + hex.id"
+            :class="isManualReconChosenHex(hex) ? 'hex-recon-source-chosen' : 'hex-recon-source'"
+            :points="hex.pts" vector-effect="non-scaling-stroke" />
+          <polygon v-for="hex in hexes.filter(isManualReconTargetHex)" :key="'rtgt' + hex.id" class="hex-recon-target"
+            :points="hex.pts" vector-effect="non-scaling-stroke" />
+        </g>
+
         <!-- cf. lib/useCombat.js::canPlaceSupportHex — un pion de soutien
              attend son hex (mode Assisté) : hex cibles possibles en
              pointillé vert, cliquables pour l'y poser. Hors du groupe
@@ -4183,7 +4435,7 @@ function onMapDragEnd() {
         <g v-if="showCounters" class="counters">
           <!-- Marqueurs (DZ...) rendus en premier : toujours sous les unités
                dans l'ordre de peinture SVG, quel que soit le hex. -->
-          <Counter v-for="counter in counters.filter((counter) => !isUnit(counter) && !isSupport(counter))" :key="counter.id" :id="counter.id" :src="counter.src" :col="counter.col"
+          <Counter v-for="counter in counters.filter((counter) => !isUnit(counter) && !isSupport(counter) && !counter.attachedTo)" :key="counter.id" :id="counter.id" :src="counter.src" :col="counter.col"
             :row="counter.row" :calibration="calibration" :selected="selectedCounterId === counter.id" :selectable="false"
             :offset="stackOffsets.get(counter.id) ?? ZERO_OFFSET" :drag-px="draggedCounterId === counter.id ? dragCurrentPx : null"
             @dragstart="onCounterDragStart" @hex-click="onMarkerClick" @hover="onCounterHover" @unhover="onCounterUnhover" />
@@ -4195,6 +4447,12 @@ function onMapDragEnd() {
             :offset="stackOffsets.get(counter.id) ?? ZERO_OFFSET" :drag-px="draggedCounterId === counter.id ? dragCurrentPx : null"
             @select="onCounterSelect" @dragstart="onCounterDragStart" @contextmenu="onCounterContextMenu"
             @hover="onCounterHover" @unhover="onCounterUnhover" />
+          <!-- Résultats de recherche et pions "Sighted" (cf. `reportRecon`) :
+               posés SUR la pile qu'ils renseignent, transparents aux clics
+               (cf. `syncSearchMarkers`). -->
+          <Counter v-for="counter in counters.filter((counter) => counter.attachedTo)" :key="counter.id" :id="counter.id" :src="counter.src" :col="counter.col"
+            :row="counter.row" :calibration="calibration" :selected="false" :selectable="false"
+            :offset="stackOffsets.get(counter.id) ?? ZERO_OFFSET" class="search-marker" />
           <!-- Pions de soutien rendus en dernier : toujours au-dessus des
                unités qu'ils coiffent (cf. `stackOffsets`). -->
           <Counter v-for="counter in counters.filter(isSupport)" :key="counter.id" :id="counter.id" :src="counter.src" :col="counter.col"
@@ -4230,6 +4488,7 @@ function onMapDragEnd() {
       </template>
     </SidePanel>
 
+    <Toast :message="reconToast" @close="reconToast = null" />
     <ContextMenu v-if="contextMenu" :left-px="contextMenu.x" :top-px="contextMenu.y" :items="contextMenu.items"
       @choose="chooseContextMenuItem" @close="closeContextMenu" />
     <StackPopup v-if="hoveredStackCounters.length" :counters="hoveredStackCounters" :anchor="hoveredCounter.anchor"
@@ -4554,6 +4813,37 @@ polygon.hex.entry:hover {
 /* cf. lib/useCombat.js — FPF du défenseur : artillerie éligible (pointillé
    bleu) et artillerie retenue (bleu plein). Les clics traversent : c'est le
    pion qui les reçoit (cf. onCounterSelect). */
+/* cf. la section "Reconnaissance du moteur" — résultat de recherche posé sur
+   une unité, transparent aux clics ; hex que le moteur vient de désigner. */
+.search-marker {
+  pointer-events: none;
+}
+.hex-recon-target {
+  fill: rgba(255, 196, 0, 0.28);
+  stroke: #ffc400;
+  stroke-width: 3;
+  pointer-events: none;
+  animation: recon-pulse 1.2s ease-in-out infinite alternate;
+}
+.hex-recon-source {
+  fill: none;
+  stroke: #4fc3f7;
+  stroke-width: 3;
+  pointer-events: none;
+}
+.hex-recon-source-chosen {
+  fill: rgba(79, 195, 247, 0.3);
+  stroke: #4fc3f7;
+  stroke-width: 4;
+  pointer-events: none;
+}
+@keyframes recon-pulse {
+  from { fill-opacity: 0.35; }
+  to { fill-opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hex-recon-target { animation: none; }
+}
 /* cf. la section "Sortie de carte" de HexMap.vue — bandes de bord ouvertes au
    camp actif. Gris discret : c'est un repère permanent de la phase, pas une
    action en attente ; les clics le traversent. */

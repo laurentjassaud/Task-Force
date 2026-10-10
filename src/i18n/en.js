@@ -326,7 +326,20 @@ export default {
     journal: 'Log',
   },
 
+  sighting: {
+    noContact: 'No contact',
+    noTF: 'No TF',
+    carrierTF: 'Carrier TF',
+    fleetTF: 'Fleet TF',
+  },
+
+  recon: {
+    toast: 'Reconnaissance in {hex}: {sighting}',
+    toastRemoved: 'Reconnaissance in {hex}: {sighting} — dummy detected, removed from play',
+  },
+
   menu: {
+    reconReport: 'Reconnaissance report',
     putBack: 'Put the counter back',
     eliminate: 'Eliminated',
     cancelMove: 'Cancel the move',
@@ -392,6 +405,10 @@ export default {
     turn: 'Turn {turn} — {side}',
     turnPhase: 'Turn {turn} — {phase}: {side}',
     turnPhaseRoll: 'Turn {turn} — {phase}',
+    dummyUnmasked: 'dummy unmasked by reconnaissance',
+    searchHidden: '{side} reconnaissance from {from} in {hex} ({unit}): {sighting}',
+    reconCarrier: 'a carrier',
+    search: '{side} reconnaissance from {from} in {hex} ({unit}): {result} → {sighting} (cup: {detected} Detected!, {misdirect} Misdirect, {contactLost} Contact Lost)',
     rollOrder: '{phase} — order by die roll: {rolls} → {side} plays first',
     reroll: ', tie, reroll: ',
     phase: 'Phase: {name}',

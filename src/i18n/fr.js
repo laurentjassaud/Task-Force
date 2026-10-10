@@ -328,7 +328,20 @@ export default {
     journal: 'Journal',
   },
 
+  sighting: {
+    noContact: 'Pas de contact',
+    noTF: 'Pas de TF',
+    carrierTF: 'Carrier TF',
+    fleetTF: 'Fleet TF',
+  },
+
+  recon: {
+    toast: 'Reconnaissance en {hex} : {sighting}',
+    toastRemoved: 'Reconnaissance en {hex} : {sighting} — leurre détecté, retiré du jeu',
+  },
+
   menu: {
+    reconReport: 'Rapport de reconnaissance',
     putBack: 'Replacer le pion',
     eliminate: 'Éliminé',
     cancelMove: 'Annuler le mouvement',
@@ -394,6 +407,10 @@ export default {
     turn: 'Tour {turn} — {side}',
     turnPhase: 'Tour {turn} — {phase} : {side}',
     turnPhaseRoll: 'Tour {turn} — {phase}',
+    dummyUnmasked: 'leurre démasqué par la reconnaissance',
+    searchHidden: 'Reconnaissance {side} depuis {from} en {hex} ({unit}) : {sighting}',
+    reconCarrier: 'un porte-avions',
+    search: 'Reconnaissance {side} depuis {from} en {hex} ({unit}) : {result} → {sighting} (tasse : {detected} Detected!, {misdirect} Misdirect, {contactLost} Contact Lost)',
     rollOrder: '{phase} — ordre au dé : {rolls} → {side} joue en premier',
     reroll: ', égalité, relance : ',
     phase: 'Phase : {name}',

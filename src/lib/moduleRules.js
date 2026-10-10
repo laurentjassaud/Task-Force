@@ -62,6 +62,33 @@ export const INERT_RULES = Object.freeze({
   /** Cet hex (`{ col, row }`) est-il interdit à ce pion — placement comme
    *  mouvement ? `true` pour l'interdire, `null` sinon. */
   hexForbidden: () => null,
+  /** Phase (id de `turnStructure.phases`) où `autoMoveSide` fait ses
+   *  reconnaissances, ou `null` (pas de reconnaissance du moteur). */
+  reconPhase: null,
+  /** Checks de reconnaissance du camp donné : chaque source (`{ key, base,
+   *  name, unitId, checks, col, row }`) explore jusqu'à `checks` de ses hex
+   *  par phase (`[{ source, targets: [{ col, row }] }]`), ou `null`. */
+  reconChecks: () => null,
+  /** Ce pion est-il une cible de reconnaissance pour ce camp ? */
+  reconTargetOf: () => false,
+  /** Camp qui fait SES reconnaissances à la main (clic source puis cible), ou `null`. */
+  manualReconSide: null,
+  /** Chits restant dans la tasse de recherche (`{ résultat: nombre }`), ou `null`. */
+  searchBag: null,
+  /** Tire un chit de recherche : `{ result, bag }`, ou `null`. */
+  drawSearch: () => null,
+  /** Remet tous les chits dans la tasse. */
+  refillSearchBag: () => {},
+  /** Rétablit le contenu de la tasse, lu dans le journal. */
+  restoreSearchBag: () => {},
+  /** Les chits reviennent-ils dans la tasse à ce tour (`turnInfo` de la piste) ? */
+  searchChitsReturn: () => false,
+  /** Pion posé pour chaque résultat : `{ résultat: { name, src } }`, ou `null`. */
+  searchResults: null,
+  /** Effet d'un chit sur l'unité explorée : `{ sighting, removed }`, ou `null`. */
+  searchOutcome: () => null,
+  /** États de repérage : `{ état: { name?, src? } }` (`src` = pion "Sighted" à poser, par camp), ou `null`. */
+  sightings: null,
 })
 
 const REGISTRY = {
