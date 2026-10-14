@@ -15,17 +15,13 @@ tous les camps) ou **en ligne** (une room par partie, un joueur par camp).
 
 ## Modules disponibles
 
-`public/modules/index.json` liste les modules ; deux sont actifs :
-- **Arnhem** (*A Bridge Too Far: Arnhem* — Opération Market-Garden, septembre
-  1944) ;
+`public/modules/index.json` liste les modules ; un seul :
 - **Coral Sea** (*Battle of the Coral Sea* — 7-8 mai 1942) : carte hexagonale
   33 × 19, task forces japonaises (TF 1, 2, 3, 7, 8, 10 et leurres Dummy) et
   marqueurs de recherche (Detected!, Contact Lost, Misdirect). Aucun pion
   n'est posé au départ : tout part du panneau latéral (cf.
   `src/lib/useCoralSea.js`). Pas encore de règles propres (ni terrain, ni
   combat, ni pions américains) : à jouer en partie Libre.
-
-Les autres (Hürtgen, Bastogne, Remagen) sont annoncés « Bientôt disponible ».
 
 ## Modes de jeu
 
@@ -34,7 +30,7 @@ avec le nombre de joueurs) — cf. `src/lib/gameSettings.js`.
 
 | Réglage | Valeurs | Effet |
 |---|---|---|
-| Scénario | Ceux du module — Arnhem : Historique (*Placement libre* : bientôt) | Déploiement |
+| Scénario | Ceux du module — Coral Sea : Historique | Déploiement |
 | Météo | *bientôt disponible* | — (pas encore appliquée par le moteur) |
 | Partie | **Libre** / **Assisté** | Voir ci-dessous |
 | Timing | Libre / **Limité** / **Blitz** | Chronomètre de la phase de Mouvement — partie Assistée uniquement |
@@ -96,20 +92,9 @@ aucune restriction de tour ni de règle, dé libre.
   « final protective fire » (FPF) du défenseur pendant le tour adverse,
   points rouge (résultat subi) et orange (refoulée) en haut à droite des
   pions ;
-- règles particulières au module (cf. `src/lib/useArnhem.js` : déploiement
-  initial, allocation réduite des aéroportés à l'arrivée, réduction des
-  retraites en ville — refusée à l'artillerie aéroportée et aux unités
-  encerclées, aéroportés et planeurs exceptés —, soutien au sol guidé
-  seulement à 3 hex d'une unité alliée non aéroportée, au plus deux
-  artilleries par camp dans un combat, passerelle du génie sur la rivière) ;
-- passerelle du génie (cf. `src/lib/useArnhem.js`, `rules.engineerCrossing`) :
-  un génie posté au bord d'une rivière, hors ZOC ennemie, ouvre un passage
-  aux aéroportés et planeurs de son camp — ils franchissent l'hexside pour le
-  seul coût d'entrée de l'hex, peuvent finir leur phase avec lui (il ne compte
-  pas dans l'empilement) et, de son hex, doivent assaillir l'ennemi d'en face,
-  combat résolu sur la ligne du ruisseau, sans le génie. Qui ne prend pas
-  l'hex est éliminé ; le génie perdu se reconstitue et revient en renfort le
-  tour suivant.
+- règles particulières au module (cf. `src/lib/useCoralSea.js` : leurres
+  japonais au rôle secret, hex-objectifs du moteur, reconnaissance et
+  repérage).
 
 **Timings** (partie Assistée) : *Limité* accorde N minutes à **chaque** phase
 de Mouvement (compte à rebours, clignote sous 20 s ; à zéro, le mouvement
@@ -186,7 +171,7 @@ public/modules/<id>/
 └── images/            # carte, marqueurs, tables, counters/<faction>/*.png
 ```
 
-Champs du JSON (cf. `arnhem.json`) :
+Champs du JSON (cf. `coral-sea.json`) :
 
 | Champ | Contenu |
 |---|---|
@@ -216,7 +201,7 @@ qu'un repli pour un module qui n'en déclarerait pas.
 
 Les **règles particulières** d'un module (ce qu'aucun champ du JSON ne sait
 exprimer) vivent dans un composable dédié inscrit dans le registre
-`src/lib/moduleRules.js` — `src/lib/useArnhem.js` sert de patron.
+`src/lib/moduleRules.js` — `src/lib/useCoralSea.js` sert de patron.
 
 ## Organisation du code
 
@@ -240,8 +225,7 @@ src/
     ├── useSupplyLine.js lignes de communication : tracé jusqu'aux arrières, ZOC, cours d'eau
     ├── useVictoryPoints.js points de victoire : totaux, éliminations, zones au-delà des fleuves
     ├── moduleRules.js   registre des règles particulières par module
-    ├── useArnhem.js     règles particulières du module Arnhem (patron pour d'autres modules)
-    ├── useCoralSea.js   règles particulières du module Coral Sea (aucun pion posé au départ)
+    ├── useCoralSea.js   règles particulières du module Coral Sea (patron pour d'autres modules)
     ├── rules.js         paramètres des règles génériques (module.rules), structure du tour (module.turnStructure)
     ├── turnTrack.js     piste de tour détaillée (initiative, détail et conditions par tour, mise en place)
     ├── setup.js         notation `setup` des pions (hex, plage, largage)
@@ -286,28 +270,16 @@ room jamais lancée, 72 h pour une partie lancée).
 
 ## Scripts
 
-`scripts/` contient les générateurs utilisés pour construire le module Arnhem
-(relançables si les données source changent) :
-
-- `apply-german-counters.mjs` — installe les images de pions allemands et
-  regénère `counters.german` dans le JSON ;
-- `gen-terrain-grid.py` — classe le terrain de chaque hex par échantillonnage
-  de couleur (Python 3 + Pillow), écrit `terrain.types`/`terrain.grid` (les
-  couches d'arêtes sont conservées) et un CSV de correction manuelle ;
-- `gen-terrain-artifact.mjs` — page HTML autonome (carte + grille colorée +
-  coûts) pour vérifier visuellement le terrain ;
-- `build-terrain-transition.mjs` — convertit l'export de cette page (routes,
-  pistes, hex retirés, corrections) en fichier de transition à relire avant
-  application.
+`scripts/decode-bug-report.mjs` décode un rapport de bug exporté par
+l'application.
 
 ## Limites connues
 
 - « Placement libre » (déploiement `free`) et « Météo » sont proposés grisés :
   le moteur ne les applique pas encore.
 - Certaines règles restent propres à un module et vivent donc dans son
-  composable de règles particulières (`src/lib/useArnhem.js` : déploiement
-  initial, arrivée des aéroportés, retraite en ville, portée du soutien au
-  sol, plafond d'artilleries par combat) ; la sémantique des
-  résultats de combat se limite à retraite / élimination / avance.
+  composable de règles particulières (`src/lib/useCoralSea.js`) ; la
+  sémantique des résultats de combat se limite à retraite / élimination /
+  avance.
 - Pas de suite de tests automatisée dans le dépôt (les vérifications se font
   par scripts ad hoc et navigateur automatisé).

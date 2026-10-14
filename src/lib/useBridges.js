@@ -11,7 +11,7 @@
 // et `isDemolished` répond toujours faux — un module qui n'en a pas joue donc
 // exactement comme avant.
 //
-// ─── LA RÈGLE (Arnhem) ───────────────────────────────────────────────────────
+// ─── LA RÈGLE (exemple) ─────────────────────────────────────────────────────
 // « Tous les ponts de canal et de chemin de fer de la carte peuvent être
 // détruits dès qu'une unité alliée occupe un hex que borde l'un d'eux, quelle
 // que soit la phase et quel que soit le tour. C'est le joueur allemand qui
@@ -20,7 +20,7 @@
 // destruction, ou si le jet ne détruit pas le pont, il ne pourra plus le
 // faire : le pont restera intact pour tout le reste de la partie. »
 //
-// ─── LA RÈGLE DE RÉPARATION (Arnhem) ─────────────────────────────────────────
+// ─── LA RÈGLE DE RÉPARATION (exemple) ───────────────────────────────────────
 // « Le génie allié peut réparer les ponts de canal détruits. S'il se trouve
 // dans un hex que borde un pont de canal détruit ET qu'il passe TOUT le tour
 // allemand hors des zones de contrôle allemandes, une modale lui est
@@ -196,7 +196,7 @@ export function useBridges({
   }
 
   /** Le camp décideur TENTE la destruction du pont `edgeKey` : un dé est
-   *  lancé, le pont tombe si sa face est dans `destroyOn` (1 ou 2 à Arnhem).
+   *  lancé, le pont tombe si sa face est dans `destroyOn` (ex. 1 ou 2).
    *  Dans les deux cas le sort du pont est réglé — réussi, il est détruit ;
    *  raté, il tient pour le reste de la partie.
    *  @param die face imposée (rejeu du journal, ou réponse reçue de l'autre
@@ -243,7 +243,7 @@ export function useBridges({
   const spentRepairerIds = ref(new Set())
 
   /** Les unités capables de réparer : celles du camp `by` dont le type figure
-   *  dans `unitTypes` (le génie allié à Arnhem). */
+   *  dans `unitTypes` (ex. le génie). */
   const repairers = computed(() => {
     if (!repairActive.value) return []
     return counters.value.filter((counter) => isFighter(counter)
@@ -289,7 +289,7 @@ export function useBridges({
    *  Chaque entrée : `{ key, layer, label, hexes, unit }` — `unit`, le pion
    *  qui relèverait ce pont, pour la modale et le journal.
    *
-   *  C'est l'APPELANT qui décide QUAND les présenter (à Arnhem, pendant la
+   *  C'est l'APPELANT qui décide QUAND les présenter (ex. pendant la
    *  phase de Fin de tour, cf. HexMap.vue) : ce composable ne connaît pas les
    *  phases. */
   const repairs = computed(() => {

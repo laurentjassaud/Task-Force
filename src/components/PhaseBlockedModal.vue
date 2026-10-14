@@ -17,6 +17,11 @@
 // Et par HexMap.vue pour le timing "Limité" (cf. MoveTimer.vue) : `title` et
 // un message libre passé dans le slot par défaut, sans liste.
 //
+// Mode CONFIRMATION (prop `confirmLabel`) : le changement de phase n'est pas
+// refusé mais demandé à nouveau (ex. reconnaissances japonaises restantes,
+// cf. HexMap.vue::onPhaseNext) — "Annuler" ferme, le second bouton renvoie
+// "confirm". Entrée et Échap annulent : passer outre demande un vrai clic.
+//
 // Contrairement à CombatModal.vue, elle est BLOQUANTE (overlay) : c'est un
 // simple message à acquitter, il n'y a rien à cliquer sur la carte pendant
 // qu'elle est ouverte.
@@ -31,9 +36,11 @@ defineProps({
   title: { type: String, default: null },
   // Phrase affichée au-dessus de la liste `stacks`.
   stackMessage: { type: String, default: null },
+  // Libellé du bouton qui confirme (mode confirmation), ou `null`.
+  confirmLabel: { type: String, default: null },
 })
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(['close', 'confirm'])
 
 function onKey(event) {
   if (event.key === 'Escape' || event.key === 'Enter') emit('close')
@@ -66,7 +73,11 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
         </li>
       </ul>
       <footer class="pb-foot">
-        <button type="button" class="pb-ok" @click="emit('close')">{{ $t('common.gotIt') }}</button>
+        <template v-if="confirmLabel">
+          <button type="button" class="pb-cancel" @click="emit('close')">{{ $t('common.cancel') }}</button>
+          <button type="button" class="pb-ok" @click="emit('confirm')">{{ confirmLabel }}</button>
+        </template>
+        <button v-else type="button" class="pb-ok" @click="emit('close')">{{ $t('common.gotIt') }}</button>
       </footer>
     </div>
   </div>
@@ -143,7 +154,22 @@ onUnmounted(() => window.removeEventListener('keydown', onKey))
 .pb-foot {
   display: flex;
   justify-content: flex-end;
+  gap: 8px;
   margin-top: 12px;
+}
+
+.pb-cancel {
+  border: 1px solid var(--white-a25);
+  background: transparent;
+  color: var(--panel-text);
+  font-size: var(--font-size-082);
+  padding: 8px 16px;
+  border-radius: var(--radius-8);
+  cursor: pointer;
+}
+
+.pb-cancel:hover {
+  background: var(--white-a10);
 }
 
 .pb-ok {

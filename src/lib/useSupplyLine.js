@@ -8,7 +8,7 @@
 // lib/rules.js::resolveSupplyLine) ; sans cette déclaration, ce fichier reste
 // INERTE et ne trace jamais rien.
 //
-// ─── LA RÈGLE (Arnhem) ───────────────────────────────────────────────────────
+// ─── LA RÈGLE (exemple) ─────────────────────────────────────────────────────
 // Elle ne concerne que les unités ALLIÉES, Polonais exceptés, et se calcule
 // de deux façons selon l'unité :
 //
@@ -80,8 +80,8 @@ import { hexDistance, neighborsOf } from './hex.js'
 
 // Étage de départ d'une ligne terrestre : elle n'est encore entrée dans aucun
 // hex de piste ni de route, et passe donc où elle veut. Les étages suivants
-// sont ceux que le module déclare (`ground.stages`, cf. `stageOfEdge`) — pour
-// Arnhem, la piste puis la route —, et un parcours ne peut que monter, jamais
+// sont ceux que le module déclare (`ground.stages`, cf. `stageOfEdge`) — ex.
+// la piste puis la route —, et un parcours ne peut que monter, jamais
 // redescendre.
 const STAGE_FREE = 0
 
@@ -97,8 +97,8 @@ export function useSupplyLine({
 
   /** L'unité `unit` a-t-elle une ligne de communication à tracer ? Il lui
    *  faut être une vraie unité du camp concerné, et d'une faction que le
-   *  module n'a pas mise à part (les Polonais d'Arnhem, qui n'ont pas
-   *  d'arrières à eux). */
+   *  module n'a pas mise à part (`excludeFactions` : une faction sans
+   *  arrières à elle). */
   function concerns(unit) {
     if (!active.value || !isFighter(unit)) return false
     if (sideOf(unit) !== supply.side) return false
@@ -107,7 +107,7 @@ export function useSupplyLine({
 
   /** L'étage de l'hexside `kinds` : la meilleure voie qui le franchit. Les
    *  étages sont ceux du module, du moins contraignant au plus contraignant
-   *  (`ground.stages` — pour Arnhem : piste, puis route) : on retient le plus
+   *  (`ground.stages` — ex. piste, puis route) : on retient le plus
    *  élevé que l'arête porte. Une arête à la fois route et piste compte donc
    *  comme une route. Tout le reste (terrain nu, ruisseau, pont sans route)
    *  vaut STAGE_FREE. Un pas n'est permis que si l'étage de son hexside
@@ -199,14 +199,14 @@ export function useSupplyLine({
   }
 
   /** Les hex SOURCES de `unit` : la zone de largage de sa division si elle
-   *  est aéroportée (le marqueur qui porte son `division`, cf. arnhem.json),
+   *  est aéroportée (le marqueur qui porte son `division`),
    *  les hex déclarés par le module sinon. Liste vide quand il n'y en a
    *  aucune — une DZ retirée de la carte, par exemple. */
   function sourcesFor(unit) {
     if (isAirborneEntry(unit)) {
       // La DZ d'une division est le MARQUEUR posé sur la carte dont le `code`
-      // est celui de la division de l'unité (cf. arnhem.json : "DZ 101" porte
-      // le code "101", et chaque aéroporté porte sa `division`).
+      // est celui de la division de l'unité (ex. "DZ 101" porte le code
+      // "101", et chaque aéroporté porte sa `division`).
       if (unit.division == null) return []
       return counters()
         .filter((marker) => !isFighter(marker) && String(marker.code) === String(unit.division))
@@ -216,7 +216,7 @@ export function useSupplyLine({
   }
 
   /** Portée maximale de la ligne, en nombre de pas : celle des aéroportés
-   *  (7 à Arnhem), ou aucune limite pour les autres. */
+   *  (`airborne.range`), ou aucune limite pour les autres. */
   function rangeFor(unit) {
     return isAirborneEntry(unit) ? (supply.airborne?.range ?? Infinity) : Infinity
   }
@@ -296,7 +296,7 @@ export function useSupplyLine({
    *
    *  Chaque pas : `{ col, row, stage }` — `stage` est l'étage de la ligne une
    *  fois ENTRÉE dans cet hex (0 libre, puis l'index+1 de `ground.stages` :
-   *  1 piste, 2 route pour Arnhem — cf. `stepStage`), qui impose ce que
+   *  ex. 1 piste, 2 route — cf. `stepStage`), qui impose ce que
    *  devra valoir l'hexside du pas SUIVANT ; pour le premier hex, celui de
    *  l'hex de l'unité (cf. `stageOfHex`). Toujours 0 pour un aéroporté
    *  (`staged` faux). `null` si l'unité n'est pas concernée. */
@@ -438,7 +438,7 @@ export function useSupplyLine({
    *  terrestres, un par zone de largage utile, et la ZOC ennemie calculée une
    *  fois (elle ne dépend que du camp). Là où interroger chaque unité
    *  séparément refait la carte autant de fois qu'il y a d'unités, ceci la
-   *  parcourt quatre fois pour Arnhem, quel que soit le nombre de pions. */
+   *  parcourt quelques fois seulement, quel que soit le nombre de pions. */
   function unsuppliedIds(units) {
     const out = new Set()
     if (!active.value) return out

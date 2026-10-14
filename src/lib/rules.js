@@ -11,7 +11,7 @@
 //
 // Les clés que le moteur ne connaît pas sont conservées telles quelles : ce
 // sont celles des RÈGLES PARTICULIÈRES d'un module (cf. lib/moduleRules.js —
-// ex. `airborneArrivalSpentMp` lue par lib/useArnhem.js), qui n'ont pas
+// ex. `airborneArrivalSpentMp`), qui n'ont pas
 // besoin d'être listées ici pour être déclarées dans le JSON.
 
 export const DEFAULT_RULES = Object.freeze({
@@ -140,15 +140,15 @@ export function resolveMapExit(raw) {
  *  fallback }` vérifié, ou `null` (aucun pont démolissable dans ce module).
  *
  *  La règle (cf. lib/useBridges.js) : un pont posé sur l'une des `layers`
- *  du module (couches d'arêtes, cf. lib/edges.js — pour Arnhem, les ponts de
- *  canal et de chemin de fer, jamais les ponts routiers) peut être démoli dès
+ *  du module (couches d'arêtes, cf. lib/edges.js — ex. les ponts de canal
+ *  et de chemin de fer, jamais les ponts routiers) peut être démoli dès
  *  qu'une unité du camp `trigger` occupe l'un des deux hex qu'il relie. C'est
  *  le camp `by` qui décide, une seule fois par pont : il lance un dé, et le
  *  pont saute si la face tirée est dans `destroyOn`.
  *
  *  Un pont démoli laisse l'obstacle qu'il franchissait : l'arête prend la
  *  première nature de `reveals` qu'elle porte déjà (rivière avant ruisseau),
- *  ou `fallback` si elle n'en porte aucune — cas du canal d'Arnhem, dont
+ *  ou `fallback` si elle n'en porte aucune — cas d'un canal dont
  *  seuls les PONTS figurent dans les données du module.
  *
  *  `layers` et `by` sont indispensables : sans eux, rien à démolir ni
@@ -188,8 +188,8 @@ export function resolveBridgeDemolition(raw) {
  *  redevient ce qu'il était : franchissable, et hors d'atteinte d'une
  *  nouvelle démolition.
  *
- *  `layers` est un SOUS-ENSEMBLE des couches démolissables : à Arnhem, le
- *  génie relève les ponts de canal, jamais ceux du chemin de fer. `by` et
+ *  `layers` est un SOUS-ENSEMBLE des couches démolissables : ex. le génie
+ *  relève les ponts de canal, jamais ceux du chemin de fer. `by` et
  *  `unitTypes` sont indispensables — sans eux, personne pour réparer. */
 export function resolveBridgeRepair(raw) {
   if (!raw || typeof raw !== 'object' || typeof raw.by !== 'string' || !raw.by) return null

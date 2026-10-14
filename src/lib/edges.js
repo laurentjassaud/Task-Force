@@ -23,7 +23,7 @@
 //   }
 //
 //   - `layers` : couche du JSON → NATURE d'arête (plusieurs couches peuvent
-//     partager une nature : les trois sortes de pont d'Arnhem) ;
+//     partager une nature : ex. trois sortes de pont) ;
 //   - `kinds` : propriétés de chaque nature, toutes facultatives —
 //       • `mp` : coût FIXE pour entrer dans l'hex par cette arête (route,
 //         piste), à la place du coût du terrain ; un hex touché par une telle
@@ -36,10 +36,10 @@
 //       • `blocksZoc` : la zone de contrôle ne s'étend pas à travers ;
 //       • `blocksAttack` : on ne peut pas attaquer à travers ;
 //       • `severs` : natures que cet obstacle COUPE quand il n'est pas
-//         enjambé (ruisseau d'Arnhem : `["road", "trail"]` — une route ou
+//         enjambé (ex. ruisseau : `["road", "trail"]` — une route ou
 //         une piste qui le traverse sans pont est sectionnée, l'arête ne vaut
 //         plus que ruisseau : +3 MP sur le coût du terrain, pas de véhicule) ;
-//       • `spans` : obstacles que cette nature ENJAMBE (pont d'Arnhem :
+//       • `spans` : obstacles que cette nature ENJAMBE (ex. pont :
 //         `["river", "stream"]`), qui ne coupent alors plus rien ;
 //   - `movementPriority` : quand une arête porte PLUSIEURS natures (après
 //     les coupures ci-dessus), celle qui fait foi pour le MOUVEMENT (coût,
@@ -48,7 +48,7 @@
 //   - `combatPriority` : même principe pour tout ce qui "traverse" l'arête
 //     sans s'y déplacer — COMBAT (attaque interdite, ligne de la table de
 //     combat substituée, cf. `module.combat.edgeRows`) et ZOC. L'ordre peut
-//     différer du mouvement (un pont d'Arnhem, souvent aussi route, doit
+//     différer du mouvement (un pont, souvent aussi route, doit
 //     primer sur elle au combat).
 //
 // Sans `terrain.edges`, aucune arête n'a d'effet (les couches sont ignorées).
@@ -64,7 +64,7 @@
 //   - `revealedKind(clé)` : la nature que l'arête prend une fois le pont
 //     démoli — l'obstacle qu'il franchissait. C'est la première nature de
 //     `reveals` que l'arête porte DÉJÀ (rivière avant ruisseau), ou
-//     `fallback` si elle n'en porte aucune : à Arnhem, le canal n'existe pas
+//     `fallback` si elle n'en porte aucune : ex. un canal qui n'existe pas
 //     dans les données, seuls ses ponts y figurent, et un pont de canal
 //     démoli doit quand même laisser un obstacle derrière lui.
 // C'est l'APPELANT qui tient la liste des ponts effectivement démolis (cf.
@@ -98,7 +98,7 @@ export function resolveEdges(terrain, demolition = null) {
 
   // Natures qui TIENNENT sur l'arête `edgeKey` (cf. l'en-tête, `severs` et
   // `spans`) : toutes celles qu'elle porte, moins celles qu'un obstacle non
-  // enjambé coupe. Ex. Arnhem : piste + ruisseau sans pont -> seul le
+  // enjambé coupe. Ex. : piste + ruisseau sans pont -> seul le
   // ruisseau reste (la piste est sectionnée) ; route + pont + ruisseau -> le
   // pont enjambe le ruisseau, qui ne coupe donc plus rien : tout reste.
   function effectiveKinds(edgeKey) {

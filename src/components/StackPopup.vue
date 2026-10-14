@@ -15,7 +15,9 @@
 import { ref, watch, nextTick } from 'vue'
 
 const props = defineProps({
-  // Pions de la pile, du dessus vers le dessous — [{ id, src, name }].
+  // Pions de la pile, du dessus vers le dessous — [{ id, src, name, detail? }]
+  // (`detail` : ligne de plus sous le nom, ex. tour de pose d'un repérage ;
+  // `fullName` : nom affiché en entier, sur plusieurs lignes au besoin).
   counters: { type: Array, required: true },
   // Rectangle écran du pion survolé — { left, top, right, bottom }.
   anchor: { type: Object, required: true },
@@ -49,7 +51,8 @@ watch(() => [props.anchor, props.counters.length], () => nextTick(place), { imme
       <div class="sp-counters">
         <figure v-for="counter in counters" :key="counter.id" class="sp-counter">
           <img :src="counter.src" :alt="counter.name" class="sp-img" />
-          <figcaption class="sp-name">{{ counter.name }}</figcaption>
+          <figcaption class="sp-name" :class="{ 'sp-name-full': counter.fullName }">{{ counter.name }}</figcaption>
+          <figcaption v-if="counter.detail" class="sp-detail">{{ counter.detail }}</figcaption>
         </figure>
       </div>
     </div>
@@ -102,5 +105,20 @@ watch(() => [props.anchor, props.counters.length], () => nextTick(place), { imme
   white-space: nowrap;
   font-size: var(--font-size-070);
   color: var(--panel-text-muted);
+}
+
+.sp-name-full {
+  white-space: normal;
+  overflow: visible;
+  text-align: center;
+  line-height: 1.2;
+}
+
+.sp-detail {
+  max-width: 64px;
+  text-align: center;
+  line-height: 1.2;
+  font-size: var(--font-size-070);
+  color: var(--panel-text);
 }
 </style>

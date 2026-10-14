@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // La table de combat est une DONNÉE de la boîte de jeu (`module.combat`, cf.
-// public/modules/arnhem/arnhem.json et son image images/combat-chart.png) ;
+// le JSON du module et l'image de sa table) ;
 // le moteur (lib/useCombat.js pour le jet, lib/useRetreat.js pour
 // l'application du résultat) ne fait que l'INTERPRÉTER. Ce fichier la lit,
 // la vérifie et fournit les deux calculs qui en dépendent.

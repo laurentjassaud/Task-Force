@@ -3,17 +3,16 @@
 // ═══════════════════════════════════════════════════════════════════════════
 //
 // Chaque boîte de jeu peut avoir des règles qu'aucun champ du JSON ne sait
-// exprimer (cf. lib/useArnhem.js, qui explique le patron et la convention
+// exprimer (cf. lib/useCoralSea.js, qui suit le patron et la convention
 // `null` = "pas de règle particulière"). Le moteur (HexMap.vue) ne connaît
 // plus chaque module par son nom : il demande ICI le composable de règles du
 // module joué, et reçoit un composable INERTE pour un module qui n'en a pas.
 //
-// AJOUTER UN MODULE : écrire `lib/useHurtgen.js` sur le patron de
-// useArnhem.js (mêmes fonctions que `INERT_RULES`, chacune rendant `null` ou
+// AJOUTER UN MODULE : écrire `lib/useMonModule.js` sur le patron de
+// useCoralSea.js (mêmes fonctions que `INERT_RULES`, chacune rendant `null` ou
 // ne faisant rien quand elle n'a rien à dire), puis l'inscrire dans
 // `REGISTRY` — c'est la seule ligne du moteur à toucher.
 import { unref } from 'vue'
-import { useArnhem, ARNHEM_MODULE_ID } from './useArnhem.js'
 import { useCoralSea, CORAL_SEA_MODULE_ID } from './useCoralSea.js'
 
 /** Interface qu'expose tout composable de règles particulières — et ce que
@@ -22,7 +21,7 @@ export const INERT_RULES = Object.freeze({
   active: false,
   /** Ce pion est-il posé au chargement ? `true`/`false` pour trancher, `null` pour laisser la règle générique. */
   autoPlacesAtLoad: () => null,
-  /** Un aéroporté vient d'être posé (mémoire du tour, cf. useArnhem.js). */
+  /** Un aéroporté vient d'être posé (mémoire du tour). */
   noteAirborneArrival: () => {},
   /** MP à compter comme déjà dépensés du fait de l'arrivée, ou `null`. */
   airborneArrivalSpentMp: () => null,
@@ -76,6 +75,8 @@ export const INERT_RULES = Object.freeze({
   manualReconSide: null,
   /** Chits restant dans la tasse de recherche (`{ résultat: nombre }`), ou `null`. */
   searchBag: null,
+  /** Contenu d'une tasse de recherche pleine, même forme que `searchBag`, ou `null`. */
+  searchBagFull: null,
   /** Tire un chit de recherche : `{ result, bag }`, ou `null`. */
   drawSearch: () => null,
   /** Remet tous les chits dans la tasse. */
@@ -90,16 +91,37 @@ export const INERT_RULES = Object.freeze({
   searchOutcome: () => null,
   /** États de repérage : `{ état: { name?, src? } }` (`src` = pion "Sighted" à poser, par camp), ou `null`. */
   sightings: null,
+  /** Ce pion éliminé peut-il revenir en jeu par un renfort de leurres ? */
+  isReusableDummy: () => false,
+  /** Ce tour (`turnInfo` de la piste) amène-t-il un renfort de leurres ? */
+  dummyReinforcementTurn: () => false,
+  /** Renfort de leurres à poser : `{ placements: [{ id, col, row }], roles, objectives }`, ou `null`. */
+  planDummyReinforcement: () => null,
+  /** Applique les rôles secrets et hex-objectifs d'un renfort de leurres. */
+  applyDummyReinforcement: () => {},
+  /** Renfort de leurres posé par le JOUEUR : `{ total, anchors }` si ce pion en est un à ce tour (`turnInfo` de la piste), `null` sinon. */
+  playerDummyReinforcement: () => null,
+  /** Pion que celui-ci suit en restant adjacent (cf. `runAutoMoves`), ou `null`. */
+  followTarget: () => null,
+  /** Réarrange le déploiement initial (`placed`, modifié sur place). */
+  arrangeInitialPositions: () => {},
+  /** Mouvement particulier d'un pion à hex-objectif, qui remplace sa marche (cf. `runAutoMoves`), ou `null`. */
+  movementPlan: () => null,
+  /** Phase (id de la piste) où le moteur lance ses raids aériens, ou `null`. */
+  raidPhase: null,
+  /** Camp qui lance ces raids, ou `null`. */
+  raidSide: null,
+  /** Raids à lancer : `[{ targetId, raiders: [{ tf, name, src }] }]`. */
+  raidPlan: () => [],
 })
 
 const REGISTRY = {
-  [ARNHEM_MODULE_ID]: useArnhem,
   [CORAL_SEA_MODULE_ID]: useCoralSea,
 }
 
 /** Composable de règles particulières du module `moduleId` (chaîne ou ref),
- *  avec le contexte `ctx` que le moteur lui prête (cf. useArnhem.js pour
- *  son contenu) — `INERT_RULES` si le module n'en déclare pas. */
+ *  avec le contexte `ctx` que le moteur lui prête (cf. HexMap.vue, appel de
+ *  `useModuleRules`) — `INERT_RULES` si le module n'en déclare pas. */
 export function useModuleRules(moduleId, ctx = {}) {
   const hook = REGISTRY[unref(moduleId)]
   return hook ? hook(moduleId, ctx) : { ...INERT_RULES }

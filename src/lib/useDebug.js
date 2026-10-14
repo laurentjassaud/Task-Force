@@ -117,7 +117,7 @@ import { computed, ref } from 'vue'
  *  mécanisme s'applique dès la 1re itération : rien n'est exploré depuis
  *  lui, donc rien n'est trouvé -> portée vide, le pion est figé sur place.
  *
- *  La grille d'un module (~1000 hex pour Arnhem) est assez petite pour se
+ *  La grille d'un module (~1000 hex) est assez petite pour se
  *  passer d'un tas binaire : une simple recherche linéaire du nœud non
  *  visité le plus proche suffit très largement. Renvoie un Set de clés
  *  "col,row", SANS le hex de départ (`c` n'a pas besoin d'"entrer" dans son

@@ -1,7 +1,7 @@
 // Calibration de la grille hexagonale posée sur l'image de carte, en pixels
 // natifs de l'image (pas en pixels écran — le zoom ne touche pas ces valeurs).
 // Chaque module déclare la sienne dans son JSON (`map.calibration`, cf.
-// public/modules/arnhem/arnhem.json) ; HexMap.vue la complète avec
+// public/modules/coral-sea/coral-sea.json) ; HexMap.vue la complète avec
 // `DEFAULT_CALIBRATION` ci-dessous — un simple REPLI pour un module qui
 // n'en déclarerait pas (ou pas entièrement), et la base du bouton
 // "réinitialiser défauts" de CalibrationPanel.vue.
@@ -13,8 +13,8 @@
 //  -> demi-hauteur b = rowStep / 2 ; les colonnes impaires (index 1, 3, 5…)
 //     sont décalées de +b vers le bas (disposition hex "flat-top", offset odd-q).
 //
-// Valeurs de repli : celles de la première carte calibrée (arnhem-map.jpg,
-// 3300×2550) — un autre module doit déclarer les siennes.
+// Valeurs de repli : celles de la première carte calibrée (3300×2550) — un
+// module doit déclarer les siennes.
 export const DEFAULT_CALIBRATION = {
   x0: 100.5,
   y0: 122,

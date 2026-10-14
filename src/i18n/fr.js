@@ -324,8 +324,14 @@ export default {
   tabs: {
     reinforcements: 'Renforts',
     sideReinforcements: 'Renfort {side}',
+    searchBag: 'Tasse de recherche',
     eliminated: 'Unités éliminées',
     journal: 'Journal',
+  },
+
+  searchBag: {
+    total: '{left} chits sur {total} dans la tasse',
+    hint: "Les chits tirés n'y retournent qu'aux tours « Tous rendus » de la piste (la nuit).",
   },
 
   sighting: {
@@ -338,6 +344,14 @@ export default {
   recon: {
     toast: 'Reconnaissance en {hex} : {sighting}',
     toastRemoved: 'Reconnaissance en {hex} : {sighting} — leurre détecté, retiré du jeu',
+    skipTitle: 'Reconnaissance inachevée',
+    skipMessage: 'Il reste {n} reconnaissance japonaise à faire. Passer la phase quand même ? | Il reste {n} reconnaissances japonaises à faire. Passer la phase quand même ?',
+    skipConfirm: 'Passer quand même',
+  },
+  noMove: {
+    title: 'Aucun mouvement',
+    message: "Aucune unité n'a été déplacée pendant cette phase de mouvement. Terminer la phase quand même ?",
+    confirm: 'Terminer quand même',
   },
 
   menu: {
@@ -354,6 +368,9 @@ export default {
 
   stack: {
     title: 'Hex {hex} — {n} pions',
+    placed: 'Tour {turn}',
+    placedAt: 'Tour {turn} · {time}',
+    partiallyDetected: 'Flotte partiellement détectée',
   },
 
   airborne: {
@@ -408,6 +425,9 @@ export default {
     turnPhase: 'Tour {turn} — {phase} : {side}',
     turnPhaseRoll: 'Tour {turn} — {phase}',
     dummyUnmasked: 'leurre démasqué par la reconnaissance',
+    raid: 'Raid aérien japonais sur {unit} en {hex} : {raiders}',
+    dummyReinforce: 'Nuit : {n} TF undetected japonaise rejoint la carte en {hexes} | Nuit : {n} TF undetected japonaises rejoignent la carte en {hexes}',
+    searchRefill: 'Nuit : {total} chit de recherche retourne dans la tasse ({detected} Detected!, {misdirect} Misdirect, {contactLost} Contact Lost) | Nuit : {total} chits de recherche retournent dans la tasse ({detected} Detected!, {misdirect} Misdirect, {contactLost} Contact Lost)',
     searchHidden: 'Reconnaissance {side} depuis {from} en {hex} ({unit}) : {sighting}',
     reconCarrier: 'un porte-avions',
     search: 'Reconnaissance {side} depuis {from} en {hex} ({unit}) : {result} → {sighting} (tasse : {detected} Detected!, {misdirect} Misdirect, {contactLost} Contact Lost)',
@@ -468,7 +488,6 @@ export default {
   },
 
   retreatNotes: {
-    cityRule: 'hex City (règle Arnhem)',
     reduced: '{unit} : retraite réduite de {from} à {to} hex ({reason})',
     noOtherWay: 'faute de retraite possible',
     cannotRetreat: '{unit} ne peut pas retraiter : éliminé',

@@ -419,7 +419,7 @@ onUnmounted(() => {
         </span>
       </p>
       <!-- Réduction facultative offerte par le module dans l'hex actuel
-           (ex. hex City à Arnhem, cf. useArnhem.js::cityRetreatReduction). -->
+           (cf. lib/moduleRules.js::cityRetreatReduction). -->
       <button v-if="retreat?.reduction" class="cm-end-advance" @click="$emit('reduce-retreat')">
         {{ retreat.reduction.total < retreat.step ? t('combat.stopHere') : t('combat.reduceRetreat', { n: retreat.reduction.total }) }}
         ({{ retreat.reduction.reason }})

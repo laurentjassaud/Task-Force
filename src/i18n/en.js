@@ -322,8 +322,14 @@ export default {
   tabs: {
     reinforcements: 'Reinforcements',
     sideReinforcements: '{Side} reinforcements',
+    searchBag: 'Search cup',
     eliminated: 'Eliminated units',
     journal: 'Log',
+  },
+
+  searchBag: {
+    total: '{left} of {total} chits in the cup',
+    hint: 'Drawn chits only go back in on the "all returned" turns of the track (at night).',
   },
 
   sighting: {
@@ -336,6 +342,14 @@ export default {
   recon: {
     toast: 'Reconnaissance in {hex}: {sighting}',
     toastRemoved: 'Reconnaissance in {hex}: {sighting} — dummy detected, removed from play',
+    skipTitle: 'Reconnaissance not finished',
+    skipMessage: '{n} Japanese reconnaissance is still to do. Skip the phase anyway? | {n} Japanese reconnaissances are still to do. Skip the phase anyway?',
+    skipConfirm: 'Skip anyway',
+  },
+  noMove: {
+    title: 'No movement',
+    message: 'No unit was moved during this movement phase. End the phase anyway?',
+    confirm: 'End anyway',
   },
 
   menu: {
@@ -352,6 +366,9 @@ export default {
 
   stack: {
     title: 'Hex {hex} — {n} counters',
+    placed: 'Turn {turn}',
+    placedAt: 'Turn {turn} · {time}',
+    partiallyDetected: 'Fleet partially detected',
   },
 
   airborne: {
@@ -406,6 +423,9 @@ export default {
     turnPhase: 'Turn {turn} — {phase}: {side}',
     turnPhaseRoll: 'Turn {turn} — {phase}',
     dummyUnmasked: 'dummy unmasked by reconnaissance',
+    raid: 'Japanese air raid on {unit} in {hex}: {raiders}',
+    dummyReinforce: 'Night: {n} Japanese TF undetected joins the map in {hexes} | Night: {n} Japanese TF undetected join the map in {hexes}',
+    searchRefill: 'Night: {total} search chit goes back in the cup ({detected} Detected!, {misdirect} Misdirect, {contactLost} Contact Lost) | Night: {total} search chits go back in the cup ({detected} Detected!, {misdirect} Misdirect, {contactLost} Contact Lost)',
     searchHidden: '{side} reconnaissance from {from} in {hex} ({unit}): {sighting}',
     reconCarrier: 'a carrier',
     search: '{side} reconnaissance from {from} in {hex} ({unit}): {result} → {sighting} (cup: {detected} Detected!, {misdirect} Misdirect, {contactLost} Contact Lost)',
@@ -466,7 +486,6 @@ export default {
   },
 
   retreatNotes: {
-    cityRule: 'City hex (Arnhem rule)',
     reduced: '{unit}: retreat reduced from {from} to {to} hex(es) ({reason})',
     noOtherWay: 'no retreat possible otherwise',
     cannotRetreat: '{unit} cannot retreat: eliminated',

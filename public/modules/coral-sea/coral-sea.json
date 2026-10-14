@@ -553,6 +553,7 @@
       },
       {
         "time": "1800",
+        "dummyReinforcement": true,
         "initiative": "ijn",
         "movement": 2,
         "skipPhases": [
@@ -744,6 +745,7 @@
       },
       {
         "time": "1800",
+        "dummyReinforcement": true,
         "initiative": "ijn",
         "movement": 2,
         "skipPhases": [
@@ -799,12 +801,12 @@
       },
       {
         "id": "navalCombat",
-        "label": "Combat naval",
-        "order": "roll"
+        "label": "Combat naval"
       },
       {
         "id": "airOperations",
-        "label": "Opérations aériennes"
+        "label": "Opérations aériennes",
+        "order": "roll"
       },
       {
         "id": "reconnaissance",
@@ -817,7 +819,7 @@
     ]
   },
   "rules": {
-    "stackingLimit": "none"
+    "stackingLimit": 1
   },
   "counters": {
     "ijn": [
@@ -889,121 +891,121 @@
       },
       {
         "id": "ijn-dummy-1",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-2",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-3",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-4",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-5",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-6",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-7",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-8",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-9",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-10",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-11",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       },
       {
         "id": "ijn-dummy-12",
-        "name": "Dummy",
+        "name": "TF undetected",
         "code": "Dummy",
         "type": "task force",
         "faction": "ijn",
-        "src": "/modules/coral-sea/images/counters/ijn/IJN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/ijn/IJN_Fleet.png",
         "turn": 1,
         "setup": "0601-2701"
       }
@@ -1158,7 +1160,7 @@
         "code": "Dummy",
         "type": "task force",
         "faction": "usn",
-        "src": "/modules/coral-sea/images/counters/usn/USN_Dummy.png",
+        "src": "/modules/coral-sea/images/counters/usn/USN_Fleet.png",
         "turn": 0,
         "setup": "*",
         "multiple": true

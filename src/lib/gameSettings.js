@@ -8,12 +8,12 @@
 import { t, mt } from '../i18n/index.js'
 
 // --- Scénarios ---------------------------------------------------------------
-// Chaque module déclare ses scénarios (`module.scenarios`, cf. arnhem.json) :
+// Chaque module déclare ses scénarios (`module.scenarios`, cf. coral-sea.json) :
 // `{ id, label, deployment, weather, available }`. Le MOTEUR, lui, sait quels
 // modes de déploiement il applique (`SUPPORTED_DEPLOYMENTS`) : un scénario
 // dont le déploiement n'est pas encore implémenté est proposé grisé ("Bientôt
 // disponible") et jamais retenu (cf. `scenarioOptions`, `resolveSettings`) —
-// c'est le cas du placement libre d'Arnhem, qui demande un déploiement au
+// c'est le cas d'un placement libre, qui demande un déploiement au
 // choix des joueurs que HexMap.vue ne fait pas encore.
 //   - 'setup' : chaque pion à l'hex d'entrée déclaré par son `setup` (cf.
 //     HexMap.vue::buildInitialCounters) — le seul mode existant ;

@@ -51,7 +51,7 @@ export function isFighter(counter) {
 
 /** Une ARTILLERIE : pion à valeurs de tir (`bar` — barrage, cf. README,
  *  table `counters`), ou dont le type la déclare comme telle ("arty",
- *  "airborne arty", "self-propelled arty"... à Arnhem). */
+ *  "airborne arty", "self-propelled arty"...). */
 export function isArtillery(counter) {
   return isFighter(counter) && (counter.bar != null || /\barty\b|artill/i.test(counter.type ?? ''))
 }

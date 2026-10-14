@@ -47,7 +47,7 @@ const partyLabel = (settings) => (te(`settings.party.${settings?.party}`) ? t(`s
 const entries = ref([]) // { id, t: "14:32:05", kind, text, data } — plus récent en tête
 let nextId = 1
 
-/** "Arnhem: Op. Market-Garden" -> "arnhem-op-market-garden" — pour un index
+/** "Coral Sea: May 1942" -> "coral-sea-may-1942" — pour un index
  *  de sauvegarde utilisable comme nom de fichier ou clé de stockage. */
 const DIACRITICS_RE = new RegExp('[\\u0300-\\u036f]', 'g') // marques diacritiques combinantes (accents) après normalize('NFD')
 function slugify(text) {

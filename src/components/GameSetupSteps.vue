@@ -47,9 +47,9 @@ watch(scenarios, (list) => {
   }
 })
 
-// Un scénario peut rendre la météo obligatoire (`weather: 'required'`, ex. le
-// placement libre d'Arnhem : pas de conditions historiques connues à
-// appliquer par défaut).
+// Un scénario peut rendre la météo obligatoire (`weather: 'required'`, ex. un
+// placement libre : pas de conditions historiques connues à appliquer par
+// défaut).
 const weatherRequired = computed(() => scenarios.value.find((option) => option.id === scenario.value)?.weather === 'required')
 watch(weatherRequired, (required) => {
   if (required) weather.value = true

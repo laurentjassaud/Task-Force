@@ -1,32 +1,8 @@
 [
   {
-    "id": "arnhem",
-    "name": "Arnhem: Operation Market-Garden, September 1944",
-    "path": "/modules/arnhem/arnhem.json",
-    "active": true
-  },
-  {
     "id": "coral-sea",
     "name": "Battle of the Coral Sea, May 1942",
     "path": "/modules/coral-sea/coral-sea.json",
     "active": true
-  },
-  {
-    "id": "hurtgen",
-    "name": "Hürtgen Forest",
-    "path": "/modules/hurtgen/hurtgen.json",
-    "active": false
-  },
-  {
-    "id": "bastogne",
-    "name": "Bastogne",
-    "path": "/modules/bastogne/bastogne.json",
-    "active": false
-  },
-  {
-    "id": "remagen",
-    "name": "Remagen",
-    "path": "/modules/remagen/remagen.json",
-    "active": false
   }
 ]

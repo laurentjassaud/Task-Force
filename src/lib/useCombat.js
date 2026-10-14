@@ -82,7 +82,7 @@
 //     elle seule, qui distingue ici un défenseur (pion NON contrôlé, donc
 //     ennemi du joueur actif) d'un attaquant possible (pion contrôlé) — ou,
 //     pour la règle des cibles multiples, une unité "amie".
-//   - `terrain` : `module.terrain` (cf. arnhem.json) — seuls `grid` (type de
+//   - `terrain` : `module.terrain` — seuls `grid` (type de
 //     terrain de chaque hex) et `types` (leur libellé) servent ici, pour
 //     choisir la LIGNE de la table de combat.
 //   - `combatEdgeKind` : fonction `(from, h) => 'bridge' | 'river' | 'stream'
@@ -100,7 +100,7 @@
 //     Sans `track.side` déclaré, tout le soutien reste inerte ici (cf.
 //     `supportEnabled`) : le module n'en a pas, ou pas encore de règle.
 //   - `moduleRules` : règles PARTICULIÈRES au module joué (cf.
-//     lib/moduleRules.js et lib/useArnhem.js), dont ce fichier n'utilise que
+//     lib/moduleRules.js), dont ce fichier n'utilise que
 //     les deux qui touchent au combat — `supportHexAllowed` (où le soutien
 //     peut être engagé) et `maxArtilleryPerCombat` (combien d'artilleries un
 //     camp peut combiner). Chacune rend `null` quand elle ne se prononce
@@ -121,8 +121,8 @@
 // attaques faites UNIQUEMENT de soutien (cf. `canBeTarget`/`canResolve`,
 // et [8.21] : le soutien attaque seul, avec de l'artillerie, ou avec des
 // unités adjacentes). Un module peut la borner par une règle particulière
-// (cf. `moduleRules.supportHexAllowed` et lib/useArnhem.js : à Arnhem,
-// l'appui ne se guide qu'à 3 hex d'une unité alliée arrivée par la route).
+// (cf. `moduleRules.supportHexAllowed` : ex. un appui qui ne se guide qu'à
+// 3 hex d'une unité alliée arrivée par la route).
 // [9.12] Le camp propriétaire répartit ses pions comme il l'entend : tous
 // sur une même cible, ou éclatés entre plusieurs combats de la phase.
 // [9.14] La dotation ne se reporte pas d'un tour sur l'autre — cf.
@@ -137,8 +137,8 @@
 //
 // ─── COMBIEN D'ARTILLERIES DANS UN COMBAT ? ──────────────────────────────────
 // Un module peut plafonner le nombre d'artilleries qu'un MÊME CAMP fait tirer
-// sur un même combat (cf. `artilleryLimit` et lib/useArnhem.js::
-// maxArtilleryPerCombat — deux à Arnhem). Le plafond vaut des deux côtés de
+// sur un même combat (cf. `artilleryLimit` et lib/moduleRules.js::
+// maxArtilleryPerCombat — ex. deux). Le plafond vaut des deux côtés de
 // la table, séparément : au plus N barrages à l'attaque (cf.
 // `artilleryOverLimit`), au plus N FPF en défense (cf. `fpfUnits`,
 // `fpfLimitReached`). Les pions de soutien n'y entrent pas.
@@ -152,7 +152,7 @@
 // `artilleryOnlyAttack`, qui couvre aussi le cas "soutien seul", sans aucune
 // unité attaquante) :
 //   - [8.15] seuls les résultats qui font retraiter le défenseur d'AU MOINS
-//     2 hex, ou qui l'éliminent (D2, D3, D4, De pour Arnhem), l'affectent —
+//     2 hex, ou qui l'éliminent (ex. D2, D3, D4, De), l'affectent —
 //     les autres le laissent en place (cf. `defenderImmune` dans le
 //     résultat). Les attaquants, eux, subissent normalement la part du
 //     résultat qui les vise : une artillerie AU CONTACT encaisse ([8.33]),
@@ -173,8 +173,8 @@ import { t, mt } from '../i18n/index.js'
 // --- Table de combat (CRT) -----------------------------------------------------
 //
 // La TABLE elle-même est une donnée du module (`module.combat`, cf.
-// lib/combatTable.js et, pour Arnhem, images/combat-chart.png, règle
-// [7.61]) ; ce fichier ne fait que l'interpréter. Principe : la table croise
+// lib/combatTable.js et l'image de la table du module) ; ce fichier ne fait
+// que l'interpréter. Principe : la table croise
 // un DIFFÉRENTIEL de combat (force d'attaque − force de défense) avec un
 // TERRAIN, pour donner une COLONNE ; le jet de dé donne ensuite la ligne, et
 // leur croisement le résultat.
@@ -183,11 +183,11 @@ import { t, mt } from '../i18n/index.js'
 // GAUCHE sur les colonnes de résultats, et sont de plus en plus courtes à
 // mesure que le terrain protège le défenseur. Concrètement, chaque ligne de
 // terrain est la ligne de référence (la 1re colonne de `columns`, "Clear,
-// Mixed" pour Arnhem) DÉCALÉE de N colonnes vers la gauche — c'est ce
+// Mixed" par exemple) DÉCALÉE de N colonnes vers la gauche — c'est ce
 // décalage (`shift`) qui modélise l'avantage défensif du terrain : à
 // différentiel égal, un défenseur en Rough envoie l'attaquant 3 colonnes
 // plus à gauche (résultats bien plus mauvais pour lui) qu'un défenseur en
-// terrain dégagé. Pour Arnhem :
+// terrain dégagé. Par exemple :
 //
 //   Clear, Mixed                  : —7  —6,5 —4,3  —2  —1   0  +1 +2,3 +4,5 +6-8 +9-11 +12   (shift 0, 12 colonnes)
 //   Grove, Bridge                 : —5  —4,3  —2  —1   0  +1 +2,3 +4,5 +6-8 +9-11 +12        (shift 1, 11 colonnes)
@@ -403,7 +403,7 @@ export function useCombat(assisted, phase, counters, canControl, terrain, combat
   // --- Plafond d'artilleries (cf. l'en-tête) --------------------------------
 
   /** Nombre maximal d'artilleries qu'un même camp peut faire tirer sur ce
-   *  combat (cf. lib/useArnhem.js::maxArtilleryPerCombat) — `null` : aucune
+   *  combat (cf. lib/moduleRules.js::maxArtilleryPerCombat) — `null` : aucune
    *  limite, c'est le cas de tout module qui n'en déclare pas. */
   const artilleryLimit = computed(() => moduleRules.maxArtilleryPerCombat?.() ?? null)
 
@@ -583,8 +583,8 @@ export function useCombat(assisted, phase, counters, canControl, terrain, combat
     const here = counters.value.filter((counter) => isFighter(counter) && counter.col === hex.c && counter.row === hex.r)
     if (here.length === 0 || here.some(canControl) || here.some(hasFought)) return false
     // Règle particulière du module, qui peut RESTREINDRE cette portée
-    // illimitée (cf. lib/useArnhem.js::supportHexAllowed — le soutien allié
-    // d'Arnhem ne se guide qu'à 3 hex d'une unité non aéroportée) : `false`
+    // illimitée (cf. lib/moduleRules.js::supportHexAllowed — ex. un soutien
+    // qui ne se guide qu'à 3 hex d'une unité non aéroportée) : `false`
     // ferme l'hex, `null` laisse la règle générique ci-dessus faire foi.
     if (moduleRules.supportHexAllowed?.({ col: hex.c, row: hex.r }) === false) return false
     return true
@@ -643,7 +643,7 @@ export function useCombat(assisted, phase, counters, canControl, terrain, combat
   }
 
   // Forces en présence. `atk`/`def` (et, pour l'artillerie, `bar`/`fpf`)
-  // viennent des données du module (cf. arnhem.json) ; un facteur absent
+  // viennent des données du module ; un facteur absent
   // compte pour 0. L'ATTAQUE est la somme des facteurs des attaquants —
   // barrage pour une artillerie (cf. useArtillery.js::attackFactor). La
   // DÉFENSE est la SOMME des facteurs de tous les défenseurs, tous hex cibles
@@ -857,7 +857,7 @@ export function useCombat(assisted, phase, counters, canControl, terrain, combat
    *     unité non artilleur participe à l'attaque) ;
    *   - si TOUS les attaquants au contact de cet hex franchissent un hexside
    *     de MÊME nature, et que la table substitue une ligne à cette nature
-   *     (`table.edgeRows` — pour Arnhem : "Grove, Bridge" pour un pont,
+   *     (`table.edgeRows` — ex. "Grove, Bridge" pour un pont,
    *     "Broken, Town, Woods, Stream" pour un ruisseau), c'est cet HEXSIDE qui
    *     fait foi ;
    *   - sinon (ou tant qu'aucun attaquant n'est à son contact), c'est le
@@ -868,8 +868,8 @@ export function useCombat(assisted, phase, counters, canControl, terrain, combat
   /** Nature de l'hexside que `attacker` franchit pour atteindre `targetHex`,
    *  du point de vue de la TABLE de combat. C'est `combatEdgeKind`, sauf
    *  quand une règle du module lui en substitue une autre pour cette unité
-   *  (cf. `moduleRules.engineerAssaultEdge` et lib/useArnhem.js : la
-   *  passerelle du génie fait résoudre l'assaut sur la ligne du ruisseau). */
+   *  (cf. `moduleRules.engineerAssaultEdge` : ex. une passerelle du génie
+   *  qui fait résoudre l'assaut sur la ligne du ruisseau). */
   function attackEdgeKind(attacker, targetHex) {
     const from = { c: attacker.col, r: attacker.row }
     const to = { c: targetHex.col, r: targetHex.row }
@@ -921,7 +921,7 @@ export function useCombat(assisted, phase, counters, canControl, terrain, combat
 
   /** Ligne de la table correspondant à un type de terrain de `terrain.grid`
    *  — repli sur la ligne par défaut de la table (`table.defaultRow`, "Clear,
-   *  Mixed" pour Arnhem : la moins protectrice, donc la plus neutre) pour un
+   *  Mixed" par exemple : la moins protectrice, donc la plus neutre) pour un
    *  type inconnu ou un hex sans terrain déclaré. */
   function rowForTerrain(type) {
     return table.rows.find((crtRow) => crtRow.terrains.includes(type)) ?? rowByKey(table.defaultRow)
@@ -974,7 +974,7 @@ export function useCombat(assisted, phase, counters, canControl, terrain, combat
     const code = table.results[die - 1][col - 1]
     // [8.15] Attaque faite uniquement d'artillerie et/ou de soutien : le
     // défenseur n'encaisse que les résultats qui le font retraiter d'AU
-    // MOINS 2 hex ou qui l'éliminent (D2/D3/D4/De pour Arnhem). Les autres
+    // MOINS 2 hex ou qui l'éliminent (ex. D2/D3/D4/De). Les autres
     // le laissent en place — seule la part du résultat qui vise les
     // ATTAQUANTS s'applique alors (cf. HexMap.vue::onCombatFight).
     const effect = table.effects?.[code] ?? {}

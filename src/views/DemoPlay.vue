@@ -10,7 +10,7 @@ import { APP_RELEASE, APP_VERSION } from '../lib/bugReport.js'
 // Chargement direct d'un module en local, sans passer par le lobby
 // multijoueur — pratique pour tester le moteur de jeu (HexMap) seul.
 // Le choix du module/scénario/options vient de l'assistant LocalGameSetup.vue
-// (query string) ; si absent (accès direct à /demo), on retombe sur Arnhem.
+// (query string) ; si absent (accès direct à /demo), on retombe sur Coral Sea.
 
 const route = useRoute()
 const router = useRouter()
@@ -45,9 +45,9 @@ function restartWith({ settings: saved, entries, message }) {
 }
 
 onMounted(async () => {
-  moduleId.value = route.query.module || 'arnhem'
+  moduleId.value = route.query.module || 'coral-sea'
   const index = await fetch('/modules/index.json', { cache: 'no-store' }).then((response) => response.json())
-  const entry = index.find((moduleEntry) => moduleEntry.id === moduleId.value) ?? index.find((moduleEntry) => moduleEntry.id === 'arnhem')
+  const entry = index.find((moduleEntry) => moduleEntry.id === moduleId.value) ?? index.find((moduleEntry) => moduleEntry.id === 'coral-sea')
   const res = await fetch(entry.path, { cache: 'no-store' })
   const data = await res.json()
   registerModuleTexts(data)

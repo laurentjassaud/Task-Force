@@ -11,7 +11,7 @@
 // Ce que fait chaque résultat de la table est déclaré par le module
 // (`module.combat.effects`, cf. lib/combatTable.js et le paramètre
 // `resultEffect` ci-dessous) : `{ retreat: { defenders: n, attackers: n } }`
-// et/ou `{ eliminate: 'defenders' | 'attackers' }`. Pour Arnhem :
+// et/ou `{ eliminate: 'defenders' | 'attackers' }`. Par exemple :
 //   - D1..D4 : chaque DÉFENSEUR retraite de 1 à 4 hex ;
 //   - A1, A2 : chaque ATTAQUANT retraite de 1 ou 2 hex ;
 //   - Br     : défenseurs PUIS attaquants retraitent d'1 hex chacun ;
@@ -144,7 +144,7 @@
 //   - `retreatReduction` (optionnel) : `(unit, { col, row }, { initial,
 //     total, done }) => { total, reason } | null` — point d'accroche des
 //     règles PARTICULIÈRES d'un module qui permettent de RACCOURCIR une
-//     retraite (ex. lib/useArnhem.js::cityRetreatReduction). Le moteur n'en
+//     retraite (cf. lib/moduleRules.js::cityRetreatReduction). Le moteur n'en
 //     connaît pas le contenu : il demande seulement, pour l'hex où se trouve
 //     l'unité, si sa retraite peut passer à un nouveau `total`. `null` = pas
 //     de réduction. La réduction est proposée au joueur (cf. `reduce`), et

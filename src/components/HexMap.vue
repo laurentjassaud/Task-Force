@@ -47,6 +47,7 @@ import JournalPanel from './JournalPanel.vue'
 import SidePanel from './SidePanel.vue'
 import ReinforcementsPanel from './ReinforcementsPanel.vue'
 import EliminatedPanel from './EliminatedPanel.vue'
+import SearchBagPanel from './SearchBagPanel.vue'
 import ContextMenu from './ContextMenu.vue'
 import Toast from './Toast.vue'
 import StackPopup from './StackPopup.vue'
@@ -111,7 +112,7 @@ const props = defineProps({
   // En ligne : journal partagé déjà enregistré par le serveur (ordre
   // chronologique), rejoué au montage pour reconstituer la partie.
   initialJournal: { type: Array, default: () => [] },
-  // Identifiant court du module (ex. "arnhem", cf. public/modules/index.json)
+  // Identifiant court du module (ex. "coral-sea", cf. public/modules/index.json)
   // — sert uniquement à nommer les sauvegardes du journal (cf.
   // JournalPanel.vue::saveLabel). À défaut (non fourni par l'appelant), on
   // retombe sur `module.name`.
@@ -318,7 +319,7 @@ function clearAllMoved() {
   // Nouveau tour/camp : plus rien à annuler du tour écoulé (cf. `moveHistory`).
   moveHistory.value = []
   // Les règles particulières du module qui ne valent que pour le tour écoulé
-  // s'effacent au même moment (cf. lib/useArnhem.js::clearTurnState — les
+  // s'effacent au même moment (cf. lib/moduleRules.js::clearTurnState — les
   // aéroportés largués ce tour-ci, dont l'allocation de mouvement est
   // réduite jusqu'au tour suivant). Sans effet sur les autres modules.
   moduleRules.clearTurnState()
@@ -379,7 +380,7 @@ function cancelMovement(id) {
     // recréditer un seul hex. Ne fait rien hors mode Assisté.
     resetMp(counter)
     // ...sauf ce que le module lui compte comme déjà dépensé À SON ARRIVÉE
-    // (cf. lib/useArnhem.js::airborneArrivalSpentMp) : un aéroporté largué
+    // (cf. lib/moduleRules.js::airborneArrivalSpentMp) : un aéroporté largué
     // ce tour-ci qui annule son mouvement retrouve ses 3 MP d'atterrissage,
     // pas les 7 de son allocation imprimée.
     const arrivalMp = moduleRules.airborneArrivalSpentMp(counter)
@@ -585,7 +586,7 @@ const hexes = computed(() => {
 })
 
 // Tous les pions déclarés par le module, toutes factions confondues (cf.
-// public/modules/arnhem/arnhem.json -> counters.*) — sert à la fois au
+// public/modules/coral-sea/coral-sea.json -> counters.*) — sert à la fois au
 // placement initial ci-dessous et à la liste des renforts pas encore posés
 // (cf. `reinforcements`).
 const allCounters = computed(() => Object.values(props.module.counters || {}).flat())
@@ -659,38 +660,14 @@ const rules = resolveRules(props.module.rules)
 const turnStructure = resolveTurnStructure(props.module.turnStructure)
 
 // Règles PARTICULIÈRES au module joué (cf. lib/moduleRules.js, registre par
-// module — ex. lib/useArnhem.js) : tout ce qui ne vaut QUE pour une boîte de
+// module — ex. lib/useCoralSea.js) : tout ce qui ne vaut QUE pour une boîte de
 // jeu précise et qu'aucun champ du JSON ne sait exprimer. Pour un module qui
 // n'en déclare pas, chaque règle renvoie `null` et le moteur générique
 // ci-dessous s'applique tel quel.
 const moduleRules = useModuleRules(toRef(props, 'moduleId'), {
-  sides: props.module.sides,
-  isUnit,
-  assisted: toRef(props, 'assisted'),
   terrain: props.module.terrain,
-  rules,
   // Tous les pions du module (cf. lib/useCoralSea.js, tirage des leurres).
   allCounters: () => allCounters.value,
-  // Pions posés sur la carte, passés en FONCTION : `counters` n'est déclaré
-  // que plus bas (il dépend de `autoPlacesAtLoad`, donc de ce composable) —
-  // même détour que `reinforcements` avec useAssisted().
-  counters: () => counters.value,
-  // De quoi juger ce qu'une unité peut atteindre autour d'elle (encerclement,
-  // cf. lib/useArnhem.js::isSurrounded). Enveloppées dans des lambdas pour la
-  // même raison : useAssisted() n'est appelé qu'ensuite, et ne fournit ses
-  // fonctions qu'à ce moment-là. Aucune n'est appelée avant la première
-  // retraite, bien après l'initialisation.
-  hexOnMap,
-  isFighter,
-  canEnterTerrain: (counter, hex, from) => canEnterTerrain(counter, hex, from),
-  enemyZocSet: (counter) => enemyZocSet(counter),
-  isEnemyOf: (counterA, counterB) => isEnemyOf(counterA, counterB),
-  // Nature d'un hexside, phase et camp actif : de quoi reconnaître une
-  // rivière et le moment où la passerelle du génie s'ouvre (cf.
-  // lib/useArnhem.js::engineerCrossingAllows).
-  edgeKind: (from, hex) => edgeKind(from, hex),
-  phase: computed(() => phase.value),
-  activeSide: computed(() => turnInfo.value.activeSideKey),
 })
 
 // Étiquette secrète d'un pion (cf. `moduleRules.privateLabel` — ex. vraie
@@ -715,9 +692,8 @@ function privateLabelOf(counter) {
 // pions sans ce champ, ex. une garnison fixe). C'est la règle GÉNÉRIQUE,
 // valable pour tout module.
 // Un module peut la restreindre via ses règles particulières (cf.
-// lib/useArnhem.js::autoPlacesAtLoad — Arnhem y retient hors carte les
-// renforts allemands du tour 1 et toutes les UNITÉS alliées, dont seules les
-// zones de largage "DZ" sont posées au coup d'envoi). La règle du module
+// lib/useCoralSea.js::autoPlacesAtLoad — la mer de Corail ne pose au coup
+// d'envoi que les 12 leurres japonais). La règle du module
 // renvoie `null` quand elle ne se prononce pas — y compris, toujours, sur
 // les autres modules — et on retombe alors sur la règle générique.
 // Les renforts restants (tous tours/factions confondus) restent hors carte,
@@ -740,7 +716,7 @@ function autoPlacesAtLoad(counter) {
  *  `move`/`place` rejoué fixe une position absolue. */
 function buildInitialCounters() {
   // Hex PLEINS au regard de la limite d'empilement du module
-  // (`rules.stackingLimit` : 1 à Arnhem ; aucune à la mer de Corail, où
+  // (`rules.stackingLimit` : un nombre, ou aucune à la mer de Corail, où
   // plusieurs leurres peuvent donc tomber dans le même hex) — seuls ceux-là
   // sont évités.
   const unitsPerHex = new Map()
@@ -759,7 +735,26 @@ function buildInitialCounters() {
     }
     placed.push({ ...counter, ...pos })
   }
+  // Groupes du module (escortes collées à leur task force, cf.
+  // lib/useCoralSea.js) : sauf positions imposées (partie en ligne).
+  if (!Object.keys(props.initialPositions).length) moduleRules.arrangeInitialPositions(placed, setupAdjacentHexes)
   return placed
+}
+
+/** Hex adjacents à (`col`, `row`) où poser `counter` au déploiement : sur la
+ *  carte, permis par le module, et dans sa plage `setup` s'il y en a. */
+function setupAdjacentHexes(counter, col, row) {
+  const around = neighborsOf(col, row).filter((hex) => hexOnMap(hex.col, hex.row) && moduleRules.hexForbidden(counter, hex) !== true)
+  const zone = counter.setup ? deploymentCells(parseSetup(counter.setup), hexOnMap) : []
+  const inZone = around.filter((hex) => zone.some((cell) => cell.col === hex.col && cell.row === hex.row))
+  return inZone.length ? inZone : around
+}
+
+/** Hex adjacents à (`col`, `row`) où `counter` peut aller en cours de
+ *  partie : sur la carte et praticables (terrain, cf. `canEnterTerrain`). */
+function playAdjacentHexes(counter, col, row) {
+  return neighborsOf(col, row).filter((hex) => hexOnMap(hex.col, hex.row)
+    && canEnterTerrain({ ...counter, col, row, enteredFrom: null }, { c: hex.col, r: hex.row }, { c: col, r: row }))
 }
 const counters = ref(buildInitialCounters())
 // Positions de départ de CETTE partie (cf. `logDeploymentOnce`), capturées
@@ -849,7 +844,7 @@ const artillery = useArtillery({
   phase, step: currentStep, counters, isEnemyOf, edgeBlocksAttack,
   resultEffect: (code) => combatTable?.effects[code] ?? null,
   // Règles particulières du module qui ouvrent un hexside au combat (cf.
-  // lib/useArnhem.js::engineerAssaultEdge) — inertes pour les autres modules.
+  // lib/moduleRules.js::engineerAssaultEdge) — inertes pour les autres modules.
   moduleRules,
 })
 
@@ -875,7 +870,7 @@ const {
   // de quoi savoir ce que vaut un pion de soutien et s'il attaque ou défend.
   { track: props.module.supportTrack, activeSide: computed(() => turnInfo.value.activeSideKey) },
   // Règles particulières du module qui touchent au combat (cf.
-  // lib/useArnhem.js) — inertes pour un module qui n'en déclare pas.
+  // lib/moduleRules.js) — inertes pour un module qui n'en déclare pas.
   moduleRules)
 
 // Application du résultat d'un combat (retraites au clic, éliminations — cf.
@@ -918,7 +913,7 @@ const {
   resultEffect: (code) => combatTable?.effects[code] ?? null,
   advanceAfterCombat: combatTable?.advanceAfterCombat ?? true,
   // Réductions de retraite propres au module (cf.
-  // lib/useArnhem.js::cityRetreatReduction) — `null` hors Arnhem.
+  // lib/moduleRules.js::cityRetreatReduction) — `null` sans règle du module.
   retreatReduction: (unit, hex, task) => moduleRules.cityRetreatReduction(unit, hex, task),
   // Avance après combat : même traitement qu'un pas de retraite, sous une
   // entrée `advance` (cf. applyReplayEntry).
@@ -930,7 +925,7 @@ const {
   },
 })
 
-// --- Assaut de rivière : prendre l'hex ou mourir (cf. lib/useArnhem.js) ------
+// --- Assaut de rivière : prendre l'hex ou mourir (cf. lib/moduleRules.js) ---
 // « Si l'unité alliée est incapable d'avancer après ce combat à travers la
 // rivière, elle est éliminée. » Un assaut mené sur la passerelle du génie est
 // un tout ou rien : l'unité qui ne tient pas l'hex d'en face une fois le
@@ -1066,7 +1061,7 @@ let demolitionTimer = null
 // passe au pont suivant (ou ne se ferme) — même principe que CombatModal.vue.
 const DEMOLITION_RESULT_MS = 2200
 
-// EN LIGNE, qui décide ? Le camp `by` de la règle (l'allemand à Arnhem), qui
+// EN LIGNE, qui décide ? Le camp `by` de la règle, qui
 // n'a pas toujours la main — c'est même le cas courant, les occasions
 // naissant des mouvements alliés. On reprend alors le déroulé du FPF (cf. la
 // section "FPF en ligne") : le joueur actif SOUMET l'occasion, son écran
@@ -1422,7 +1417,7 @@ const fpfView = computed(() => {
 })
 
 // --- Plafond d'artilleries du module (cf. lib/useCombat.js, section "COMBIEN
-// D'ARTILLERIES DANS UN COMBAT ?", et lib/useArnhem.js::maxArtilleryPerCombat)
+// D'ARTILLERIES DANS UN COMBAT ?", et lib/moduleRules.js::maxArtilleryPerCombat)
 // : ce que la modale en montre (cf. CombatModal.vue, prop `artilleryCap`),
 // `null` pour un module qui n'en déclare pas — la modale n'en dit alors rien.
 const artilleryCapView = computed(() => (artilleryLimit.value == null ? null : {
@@ -1473,7 +1468,7 @@ const defenderSupportTokens = computed(() => {
  *  PREMIER hex cible (cf. `placeDefenderSupports`) — c'est donc cet hex-là
  *  qu'il faut soumettre à la règle de placement (cf.
  *  lib/useCombat.js::canPlaceSupportHex, et la restriction de portée du
- *  module, cf. lib/useArnhem.js::supportHexAllowed). Calculé à l'identique
+ *  module, cf. lib/moduleRules.js::supportHexAllowed). Calculé à l'identique
  *  sur les deux écrans : celui du défenseur (pour lui proposer ses pions) et
  *  celui de l'attaquant (pour savoir s'il doit lui soumettre le combat). */
 const defenderSupportHexOk = computed(() => {
@@ -1696,6 +1691,43 @@ function closeGuide() {
 // phase Airborne en laissant une vague à terre, la phase Mouvement avec des
 // unités empilées, la phase Combat avec un combat obligatoire en attente.
 const showPhaseBlocked = ref(false)
+// Confirmation demandée avant de quitter la phase de reconnaissance du moteur
+// alors qu'il lui reste des hex à explorer (cf. onPhaseNext) : nombre de
+// reconnaissances restantes, ou `null` (modale fermée).
+const reconSkipPending = ref(null)
+let reconSkipConfirmed = false
+
+/** Reconnaissances que le moteur peut encore faire dans sa phase en cours
+ *  (cf. `continueEngineRecon`) — 0 hors de cette phase. */
+function pendingEngineRecons() {
+  if (!reconPhaseOf(moduleRules.autoMoveSide) || !searchBagLeft()) return 0
+  return openReconChecks(moduleRules.autoMoveSide).length
+}
+/** "Passer quand même" : la phase est quittée malgré tout. */
+function confirmReconSkip() {
+  reconSkipPending.value = null
+  reconSkipConfirmed = true
+  onPhaseNext()
+}
+
+// Confirmation demandée avant de quitter la phase Mouvement du camp joueur
+// (celui que le moteur ne joue pas, cf. `moduleRules.autoMoveSide`) sans
+// qu'aucune de ses unités ait bougé (cf. onPhaseNext).
+const noMovePending = ref(false)
+let noMoveConfirmed = false
+
+/** Le camp joueur termine-t-il sa phase Mouvement sans avoir rien bougé ? */
+function endsMovementUnmoved() {
+  const side = turnInfo.value.activeSideKey
+  if (phase.value !== 0 || !moduleRules.autoMoveSide || !side || side === moduleRules.autoMoveSide) return false
+  return !counters.value.some((counter) => movedThisTurnIds.value.has(String(counter.id)) && sideOfCounter(counter) === side)
+}
+/** "Terminer quand même" : la phase est quittée sans mouvement. */
+function confirmNoMove() {
+  noMovePending.value = false
+  noMoveConfirmed = true
+  onPhaseNext()
+}
 
 /** Clic sur le bouton "suivant" de la ligne des phases (cf. TurnTracker.vue,
  *  évènement `phase-next`). Le changement de phase est refusé, et la modale
@@ -1741,6 +1773,22 @@ function onPhaseNext() {
     showPhaseBlocked.value = true
     return
   }
+  // Phase Mouvement du joueur terminée sans aucun mouvement : simple
+  // confirmation, contre un clic trop rapide sur "suivant".
+  const unmoved = !noMoveConfirmed && endsMovementUnmoved()
+  noMoveConfirmed = false
+  if (unmoved) {
+    noMovePending.value = true
+    return
+  }
+  // Reconnaissances du moteur encore à faire : simple confirmation, le
+  // joueur reste libre de les abandonner.
+  const pendingRecons = reconSkipConfirmed ? 0 : pendingEngineRecons()
+  reconSkipConfirmed = false
+  if (pendingRecons > 0) {
+    reconSkipPending.value = pendingRecons
+    return
+  }
   const before = phase.value
   const stepBefore = turnTrackerRef.value?.currentStep
   advance()
@@ -1781,6 +1829,14 @@ function applyRemotePhase(newPhase, step, blitzUsed) {
 }
 
 const selectedCounterId = ref(null)
+
+// Changement de pas de la piste (piste à phases entremêlées : on passe du
+// Mouvement d'un camp à celui de l'autre SANS changer de phase) : un pion
+// que le nouveau camp actif ne contrôle pas est désélectionné.
+watch(() => turnInfo.value.step, () => {
+  const selected = counters.value.find((counter) => counter.id === selectedCounterId.value)
+  if (selected && !canControl(selected)) selectedCounterId.value = null
+})
 
 // Entrée en phase Combat : un pion resté sélectionné depuis la phase
 // Mouvement est désélectionné — en phase Combat, une unité amie ne se
@@ -1889,8 +1945,9 @@ const placedIds = computed(() => new Set(counters.value.map((counter) => String(
 const exitedUnits = ref(new Map())
 
 // Unités ÉLIMINÉES qu'une règle du module fait revenir en renfort (cf.
-// lib/useArnhem.js::rebuiltReinforcement — le génie d'Arnhem se reconstitue
-// et se représente au tour suivant) : id -> `{ setup, turn }`, où et quand.
+// lib/moduleRules.js::rebuiltReinforcement — ex. une unité qui se
+// reconstitue et se représente au tour suivant) : id -> `{ setup, turn }`,
+// où et quand.
 // Elles ne rejoignent PAS les "Unités éliminées" : elles sont attendues dans
 // le panneau des renforts, ce que le journal dit d'ailleurs en toutes
 // lettres au moment de leur perte.
@@ -1958,7 +2015,9 @@ const sidePanelTabs = computed(() => {
   const base = !sides
     ? [{ key: 'reinforcements', label: t('tabs.reinforcements') }]
     : Object.keys(sides).map((side) => ({ key: side, label: sideTabLabel(side) }))
-  return [...base, { key: 'eliminated', label: t('tabs.eliminated') }, { key: 'journal', label: t('tabs.journal') }]
+  // Tasse de recherche du module (cf. SearchBagPanel.vue), s'il en a une.
+  const searchBag = moduleRules.searchBag ? [{ key: 'searchBag', label: t('tabs.searchBag') }] : []
+  return [...base, ...searchBag, { key: 'eliminated', label: t('tabs.eliminated') }, { key: 'journal', label: t('tabs.journal') }]
 })
 function reinforcementsForTab(key) {
   const sides = props.module.sides
@@ -2029,7 +2088,7 @@ function onVictoryChange({ side, value }) {
 }
 
 /** Mode Assisté : une unité vient d'être éliminée pour de bon (une unité qui
- *  se reconstitue n'a pas été perdue, cf. lib/useArnhem.js). */
+ *  se reconstitue n'a pas été perdue, cf. lib/moduleRules.js). */
 function scoreElimination(counter) {
   if (!props.assisted || !victory.active.value || actionsLocked.value) return
   const award = victory.eliminationAward(sideOfCounter(counter))
@@ -2108,7 +2167,7 @@ function startVictoryWatch() {
 // --- Ligne de communication affichée (mode debug) ----------------------------
 // La règle (cf. lib/useSupplyLine.js) ne pénalise personne pour l'instant :
 // elle se REGARDE. Pendant la phase de Fin de tour — celle du dernier camp de
-// l'ordre, l'allemand à Arnhem, le moment où l'on fait ses comptes —, un clic
+// l'ordre, le moment où l'on fait ses comptes —, un clic
 // sur une unité en mode debug trace la ligne qui la relie à ses arrières, de
 // centre d'hex en centre d'hex, chaque pas coloré selon son ÉTAGE (hors
 // piste, piste, route — cf. lib/useSupplyLine.js::traceFor). Une unité COUPÉE
@@ -2452,7 +2511,7 @@ const isReachable = (hex) => reachableSet.value.has(hex.c + ',' + hex.r)
 // 2) clic sur le pion dans le panneau (bordure orange, cf.
 //    ReinforcementsPanel.vue) puis clic sur un des hex d'entrée valides,
 //    surlignés en orange sur la carte — cf. `entryHexSet` ci-dessous pour le
-//    détail des 3 formes de `setup` (cf. arnhem.json) et de leurs hex
+//    détail des formes de `setup` (cf. lib/setup.js) et de leurs hex
 //    valides respectifs. Déclaré ICI (avant le `useDebug()` plus bas, pas
 //    juste avant `onHex` comme le reste de la logique de renfort) parce que
 //    `entryHexSet` lui est transmis, pour l'affichage debug du surcoût
@@ -2547,7 +2606,7 @@ const airborneToDropByZone = computed(() => {
 })
 
 // --- Hex d'entrée bloqué : le repli -----------------------------------------
-// Règle (Arnhem) : « If, and only if, a scheduled entry hex is occupied by an
+// Règle : « If, and only if, a scheduled entry hex is occupied by an
 // Enemy unit, or a Friendly unit in an Enemy Zone of Control, the
 // Reinforcing unit may enter the nearest unblocked map edge hex to the
 // scheduled hex, in the direction of the nearest Friendly unit. »
@@ -2623,7 +2682,7 @@ function fallbackEntryHexes(reinforcement, ref) {
 }
 
 // Hex d'entrée valides pour le renfort actuellement sélectionné, selon la
-// forme de son `setup` (cf. arnhem.json) :
+// forme de son `setup` (cf. lib/setup.js) :
 //  1. "CCRR+adj" (aéroporté, ex. chaque unité alliée près de sa DZ) : l'hex
 //     de référence ET ses 6 voisins, mais en mode Assisté UNIQUEMENT ceux
 //     qui ne contiennent AUCUNE unité, amie comme ennemie (règle "1 unité par
@@ -2639,6 +2698,9 @@ const entryHexSet = computed(() => {
   const reinforcement = selectedReinforcement.value
   const parsed = parseSetup(reinforcement?.setup)
   if (!parsed) return new Set()
+  // Renfort de leurres du joueur : sur ses task forces seulement.
+  const dummyHexes = playerDummyHexes(reinforcement)
+  if (dummyHexes) return dummyHexes
   const keys = (cells) => new Set(cells.map((hex) => hex.col + ',' + hex.row))
   if (parsed.kind === 'adjacent') return keys(landingCells(parsed, hexOnMap).filter((hex) => !airborneLandingBlocked(hex)))
   // "*" : tout hex de la carte (mise en place libre, cf. lib/setup.js).
@@ -2715,6 +2777,8 @@ const stackOffsets = computed(() => {
   const attachedCounts = new Map()
   for (const counter of counters.value) {
     if (!isSupport(counter) && !counter.attachedTo) continue
+    // Pion "Sighted" qui remplace l'image de son unité : pas rendu à part.
+    if (counter.sighted && replacesUnitImage(counter)) { offsets.set(counter.id, ZERO_OFFSET); continue }
     const key = hexKey(counter)
     const attachedIndex = counter.attachedTo ? (attachedCounts.get(key) ?? 0) : 0
     if (counter.attachedTo) attachedCounts.set(key, attachedIndex + 1)
@@ -2780,13 +2844,20 @@ function onCounterUnhover(id) {
 const hoveredStackCounters = computed(() => {
   const hover = hoveredCounter.value
   if (!hover) return []
-  const here = counters.value.filter((counter) => counter.col === hover.col && counter.row === hover.row)
+  const here = counters.value.filter((counter) => counter.col === hover.col && counter.row === hover.row && !replacesUnitImage(counter))
   if (here.length < 2) return []
+  // Les pions de repérage disent le tour où ils ont été posés.
   return [
-    ...here.filter((counter) => !isUnit(counter) && !isSupport(counter)),
-    ...here.filter(isUnit),
+    ...here.filter((counter) => !isUnit(counter) && !isSupport(counter) && !counter.attachedTo),
+    // Unité dont un "Sighted" remplace l'image : "partiellement détectée",
+    // en toutes lettres.
+    ...here.filter(isUnit).map((counter) => replacingSighted.value.has(String(counter.id))
+      ? { ...counter, src: unitSrc(counter), name: t('stack.partiallyDetected'), fullName: true }
+      : counter),
+    ...here.filter((counter) => counter.attachedTo),
     ...here.filter(isSupport),
-  ].reverse()
+  ].reverse().map((counter) => counter.placedTurn == null ? counter
+    : { ...counter, detail: t(counter.placedTime ? 'stack.placedAt' : 'stack.placed', { turn: counter.placedTurn, time: counter.placedTime }) })
 })
 
 // --- Pions de soutien en mode Assisté (cf. lib/useCombat.js, section "PIONS
@@ -2914,9 +2985,15 @@ function onCounterSelect(id) {
     if (!toggleTarget(counter) && !toggleAttacker(counter) && !props.online) toggleFpf(counter)
     return
   }
+  // Un pion adjacent au pion sélectionné : le clic vaut d'abord clic sur son
+  // hex (y déplacer le pion sélectionné, cf. onHex). Si ce déplacement n'a
+  // pas lieu (MP, terrain, empilement...), il sélectionne le pion cliqué —
+  // sans quoi il faudrait désélectionner d'abord.
   if (selectedCounterId.value != null && selectedCounterId.value !== id && isAdjacent({ c: counter.col, r: counter.row })) {
+    const mover = selectedCounter.value
+    const before = mover && `${mover.col},${mover.row}`
     onHex({ c: counter.col, r: counter.row })
-    return
+    if (!mover || `${mover.col},${mover.row}` !== before) return
   }
   if (lockedFromSelectionIds.value.has(String(id))) return
   if (!canControl(counter)) return
@@ -2929,12 +3006,36 @@ function onCounterSelect(id) {
 
 const selectedReinforcementId = ref(null)
 
+// --- Renfort de leurres du JOUEUR (cf. `moduleRules.playerDummyReinforcement`
+// — les leurres US de la mer de Corail, tours 11 et 23) : dans sa phase
+// Mouvement, AVANT d'avoir bougé quoi que ce soit, le camp pose ses leurres
+// sur l'hex d'une de ses task forces, jusqu'au total permis ; puis il fait
+// son mouvement (le leurre empilé doit alors s'écarter, cf. `stackedHexes`).
+/** Hex ("col,row") où `counter` peut être posé maintenant à ce titre —
+ *  vide une fois le total atteint ou le mouvement commencé —, ou `null`
+ *  hors de ce renfort (la pose ordinaire s'applique alors). */
+function playerDummyHexes(counter) {
+  const rule = moduleRules.playerDummyReinforcement(counter, turnTrackerRef.value?.currentTurnInfo)
+  if (!rule || phase.value !== 0) return null
+  const side = sideOfCounter(counter)
+  if (side !== turnInfo.value.activeSideKey) return null
+  const anchors = counters.value.filter(rule.anchors)
+  const moved = counters.value.some((other) => movedThisTurnIds.value.has(String(other.id)) && sideOfCounter(other) === side)
+  if (moved || anchors.length >= rule.total) return new Set()
+  return new Set(anchors.map((anchor) => anchor.col + ',' + anchor.row))
+}
+/** Le renfort `counter` peut-il être posé dans la phase en cours ? */
+function canPlaceNow(counter) {
+  const dummyHexes = playerDummyHexes(counter)
+  return dummyHexes ? dummyHexes.size > 0 : canPlaceReinforcementNow(counter)
+}
+
 function onReinforcementSelect(id) {
   if (inputLocked.value) return
   const counter = reinforcements.value.find((counter) => String(counter.id) === String(id))
   // `canPlaceReinforcementNow` : en phase Airborne, seuls les aéroportés ;
   // dans les autres phases, tout sauf eux (cf. lib/useAssisted.js).
-  if (!canControl(counter) || !canEnterThisTurn(counter) || !canPlaceReinforcementNow(counter)) return
+  if (!canControl(counter) || !canEnterThisTurn(counter) || !canPlaceNow(counter)) return
   // Désélection du pion en cours AVANT de choisir le renfort : refusée si ce
   // pion est en overstack (cf. setSelectedCounter), et le renfort n'est
   // alors pas sélectionné non plus.
@@ -3012,18 +3113,22 @@ const onHex = (hex) => {
   if (selectedReinforcementId.value != null) {
     if (isEntryHex(hex)) {
       const reinforcement = selectedReinforcement.value
-      if (reinforcement && canEnterThisTurn(reinforcement)) {
+      // Leurre posé AVANT le mouvement (cf. `playerDummyHexes`) : ni coût
+      // d'entrée, ni sélection — sur l'hex d'une task force, il serait
+      // en overstack, et le joueur enchaîne d'abord ses autres poses.
+      const dummyDrop = !!playerDummyHexes(reinforcement)
+      if (reinforcement && canEnterThisTurn(reinforcement) && (!dummyDrop || canPlaceNow(reinforcement))) {
         const placed = { ...instanceOf(reinforcement), col: hex.c, row: hex.r }
         counters.value.push(placed)
         noteMapEntry(placed.id)
         // "+adj" (aéroporté) n'est jamais un hex de bord de carte au sens de
         // cette règle — cf. lib/useAssisted.js::spendEntryCost, qui ne fait
         // rien hors mode Assisté de toute façon.
-        const paysEntry = !isAirborneEntry(reinforcement)
+        const paysEntry = !isAirborneEntry(reinforcement) && !dummyDrop
         const paid = paysEntry ? spendEntryCost(placed, hex) : null
         // Règle particulière du module sur l'arrivée (cf.
-        // lib/useArnhem.js::airborneArrivalSpentMp — un aéroporté largué
-        // compte 4 MP déjà dépensés, soit 3 MP pour ce tour-ci). Inscrit
+        // lib/moduleRules.js::airborneArrivalSpentMp — ex. un aéroporté
+        // largué qui compte des MP déjà dépensés). Inscrit
         // AVANT le `log` ci-dessous, qui journalise les MP du pion (cf.
         // `mpText`/`spentMpOf`) : la ligne du journal doit montrer, et le
         // rejeu rétablir, l'état d'APRÈS application de la règle.
@@ -3053,15 +3158,20 @@ const onHex = (hex) => {
         // SAUF en phase Airborne : on n'y déplace aucune unité, l'aéroporté
         // posé reste donc désélectionné (cf. lib/useAssisted.js).
         // Ni à la mise en place, où rien ne bouge.
-        if (phase.value !== PHASE_AIRBORNE && phase.value !== PHASE_SETUP) setSelectedCounter(placed.id)
+        if (phase.value !== PHASE_AIRBORNE && phase.value !== PHASE_SETUP && !dummyDrop) setSelectedCounter(placed.id)
       }
-      // Un pion en nombre illimité reste choisi : chaque clic en pose un autre.
-      if (!reinforcement?.multiple) selectedReinforcementId.value = null
+      // Un pion en nombre illimité reste choisi : chaque clic en pose un autre
+      // — tant qu'il en reste à poser (cf. `canPlaceNow`).
+      if (!reinforcement?.multiple || !canPlaceNow(reinforcement)) selectedReinforcementId.value = null
     }
     return
   }
   if (selectedCounterId.value != null && isAdjacent(hex) && (phase.value == null || phase.value === 0)) {
-    const counter = counters.value.find((counter) => counter.id === selectedCounterId.value)
+    const found = counters.value.find((counter) => counter.id === selectedCounterId.value)
+    // Seul le camp actif bouge ses pions : un pion de l'autre camp resté
+    // sélectionné (piste à phases entremêlées, cf. le watcher de
+    // `turnInfo.step`) ne se déplace pas.
+    const counter = found && canControl(found) ? found : null
     // Position de départ capturée AVANT tout déplacement — sert à la fois à
     // l'historique (from ci-dessous) et de paramètre "from" pour
     // canEnterHex/spendMp (cf. useAssisted.js::terrainCost, règle
@@ -3119,24 +3229,113 @@ function runAutoMoves() {
   const step = turnInfo.value.step
   if (autoMovedStep === step) return
   autoMovedStep = step
+  // Suiveurs (cf. `moduleRules.followTarget`) : meneur de chacun, résolu
+  // AVANT tout mouvement — un suiveur dont le meneur a disparu reprend
+  // alors son objectif et marche comme un meneur.
+  const leaderOf = new Map()
   for (const counter of counters.value) {
-    const target = moduleRules.autoMoveTarget(counter)
-    if (!target) continue
-    const path = pathToward({ col: counter.col, row: counter.row, enteredFrom: counter.enteredFrom ?? null }, target, {
-      hexOnMap,
-      // Le pion tel qu'il serait en `from`, entré par `enteredFrom` : les
-      // règles du terrain (passages d'île compris) jugent alors chaque pas
-      // du chemin, pas seulement le premier.
-      canStep: (from, to, enteredFrom) => canEnterTerrain({ ...counter, col: from.c, row: from.r, enteredFrom }, to, from),
-      cost: (from, to) => terrainCost(to, from),
-    })
-    for (const next of path) {
-      const hex = { c: next.col, r: next.row }
-      const fromHex = { c: counter.col, r: counter.row }
-      if (!canEnterHex(counter, hex, fromHex)) break
-      if (wouldOverstack(counter, hex) && !canLeaveAfterEntering(counter, hex, fromHex)) break
-      stepCounter(counter, hex)
+    const leader = moduleRules.followTarget(counter, counters.value)
+    if (leader) leaderOf.set(counter, leader)
+  }
+  for (const counter of counters.value) {
+    if (leaderOf.has(counter)) continue
+    // Mouvement particulier du module (cf. `moduleRules.movementPlan`) : il
+    // remplace la marche vers l'hex-objectif.
+    const plan = moduleRules.movementPlan(counter, counters.value, turnInfo.value.turn, movementAllowance)
+    const objective = moduleRules.autoMoveTarget(counter)
+    if (plan?.kind === 'attack') {
+      walkToward(counter, plan.target,
+        (next) => plan.hold && hexDistance(next, plan.target) <= plan.radius,
+        (pos) => hexDistance(pos, plan.target) <= plan.radius)
+    } else if (plan?.kind === 'avoid') {
+      // Vers l'objectif sans entrer à `range` hex ou moins des unités à
+      // éviter — ou, si l'on y est déjà, en s'en éloignant à chaque pas.
+      const gap = (hex) => Math.min(...plan.avoid.map((avoided) => hexDistance(avoided, hex)))
+      const away = (from, to) => gap(to) > plan.range || gap(to) > gap(from)
+      if (gap(counter) > plan.range && objective) walkToward(counter, objective, () => false, () => false, away)
+      else walkToward(counter, farthestFrom(counter, plan.avoid), () => false, (pos) => gap(pos) > plan.range, away)
+    } else if (objective) {
+      walkToward(counter, objective, () => false)
     }
+  }
+  // Puis les suiveurs, chacun une fois son meneur déplacé (chaînes
+  // d'escortes comprises), jusqu'à lui être adjacent. Un suiveur resté sur
+  // l'hex de son meneur (leurre d'un renfort, posé dessus, cf.
+  // `reinforceDummies`) s'en écarte vers un hex voisin libre.
+  const pending = new Set(leaderOf.keys())
+  while (pending.size) {
+    const ready = [...pending].filter((counter) => !pending.has(leaderOf.get(counter)))
+    for (const counter of ready.length ? ready : [...pending]) {
+      pending.delete(counter)
+      const leader = leaderOf.get(counter)
+      if (hexDistance(counter, leader) === 1) continue
+      if (hexDistance(counter, leader) === 0) {
+        const occupied = new Set(counters.value.filter(isUnit).map((other) => other.col + ',' + other.row))
+        const free = playAdjacentHexes(counter, counter.col, counter.row).filter((hex) => !occupied.has(hex.col + ',' + hex.row))
+        if (free.length) walkToward(counter, free[Math.floor(Math.random() * free.length)], () => false)
+        continue
+      }
+      walkToward(counter, { col: leader.col, row: leader.row },
+        (next) => next.col === leader.col && next.row === leader.row, (pos) => hexDistance(pos, leader) <= 1)
+    }
+  }
+}
+
+/** Hex de la carte le plus éloigné des hex `avoided` (au plus près de
+ *  `counter` à éloignement égal) — but d'une fuite (cf. `runAutoMoves`). */
+function farthestFrom(counter, avoided) {
+  let best = null
+  for (const hex of hexes.value) {
+    const cell = { col: hex.c, row: hex.r }
+    const gap = Math.min(...avoided.map((other) => hexDistance(other, cell)))
+    const near = hexDistance(counter, cell)
+    if (!best || gap > best.gap || (gap === best.gap && near < best.near)) best = { cell, gap, near }
+  }
+  return best?.cell ?? { col: counter.col, row: counter.row }
+}
+
+/** Avance `counter` pas à pas vers `target` le long du plus court chemin,
+ *  tant que les règles du mode Assisté le permettent (cf. `runAutoMoves`).
+ *  S'arrête avant un pas `refuse(next)`, ou après un pas qui l'amène en
+ *  `pos` tel que `done(pos)`. `allowStep(from, to)` (hex `{ col, row }`)
+ *  écarte des pas du chemin lui-même, qui contourne alors ce qu'il refuse.
+ *  Empilement : il traverse un hex occupé par une unité AMIE, mais ne s'y
+ *  arrête jamais (il s'arrête alors avant) ; un hex occupé par l'ennemi, il
+ *  ne s'y aventure pas. */
+function walkToward(counter, target, refuse, done = () => false, allowStep = () => true) {
+  const hexKey = (hex) => hex.col + ',' + hex.row
+  const others = counters.value.filter((other) => isUnit(other) && other.id !== counter.id)
+  const friendly = new Set(others.filter((other) => !isEnemyOf(counter, other)).map(hexKey))
+  const hostile = new Set(others.filter((other) => isEnemyOf(counter, other)).map(hexKey))
+  const path = pathToward({ col: counter.col, row: counter.row, enteredFrom: counter.enteredFrom ?? null }, target, {
+    hexOnMap,
+    // Le pion tel qu'il serait en `from`, entré par `enteredFrom` : les
+    // règles du terrain (passages d'île compris) jugent alors chaque pas
+    // du chemin, pas seulement le premier.
+    canStep: (from, to, enteredFrom) => !hostile.has(to.c + ',' + to.r)
+      && allowStep({ col: from.c, row: from.r }, { col: to.c, row: to.r })
+      && canEnterTerrain({ ...counter, col: from.c, row: from.r, enteredFrom }, to, from),
+    cost: (from, to) => terrainCost(to, from),
+  })
+  // Pas de ce tour-ci, d'après les MP qui restent — puis, s'il finirait sur
+  // un hex ami, on raccourcit jusqu'au dernier hex libre.
+  let left = remainingMp(counter) ?? Infinity
+  let at = { col: counter.col, row: counter.row }
+  const steps = []
+  for (const next of path) {
+    if (refuse(next)) break
+    const cost = terrainCost({ c: next.col, r: next.row }, { c: at.col, r: at.row })
+    if (left < cost) break
+    left -= cost
+    steps.push(next)
+    at = next
+    if (done(next)) break
+  }
+  while (steps.length && friendly.has(hexKey(steps[steps.length - 1]))) steps.pop()
+  for (const next of steps) {
+    const hex = { c: next.col, r: next.row }
+    if (!canEnterHex(counter, hex, { c: counter.col, r: counter.row })) break
+    stepCounter(counter, hex)
   }
 }
 // --- Camp joué par le MOTEUR (`moduleRules.autoMoveSide` — les Japonais à
@@ -3157,7 +3356,35 @@ function playEngineStep() {
   if (engineStepPlayed === step) return
   engineStepPlayed = step
   if (phase.value === 0) runAutoMoves()
+  runEngineRaid()
   continueEngineRecon()
+}
+
+// --- Raids aériens du moteur (`moduleRules.raidPhase` — "Opérations
+// aériennes" de la mer de Corail, cf. lib/useCoralSea.js::raidPlan) : à son
+// créneau de cette phase, le moteur frappe une cible et pose sur elle un
+// pion de raid par task force qui l'attaque. Les pions suivent leur cible
+// (`attachedTo`) et quittent la carte au tour suivant. Inscrit au journal
+// (entrée `raid`), d'où le rejeu et les autres joueurs le reprennent.
+function runEngineRaid() {
+  if (!moduleRules.raidPhase || turnTrackerRef.value?.currentSlot?.phase !== moduleRules.raidPhase) return
+  if (turnInfo.value.activeSideKey !== moduleRules.raidSide) return
+  // Une entrée par cible (cf. `moduleRules.raidPlan`, qui les concentre).
+  for (const raid of moduleRules.raidPlan(counters.value)) {
+    const target = counters.value.find((counter) => String(counter.id) === raid.targetId)
+    if (!target) continue
+    const markers = raid.raiders.map((raider) => ({ id: `raid-${newUid()}`, name: raider.name, code: raider.name, type: 'marker',
+      faction: 'markers', src: raider.src, col: target.col, row: target.row, raid: raider.tf, attachedTo: raid.targetId, ...placedWhen() }))
+    placeRaidMarkers(markers)
+    log('raid', t('log.raid', { unit: target.name, hex: hexId(target.col + 1, target.row), raiders: markers.map((marker) => marker.name).join(', ') }),
+      { markers })
+  }
+}
+
+/** Pose les pions d'un raid — en jeu comme au rejeu. */
+function placeRaidMarkers(markers) {
+  const fresh = (markers ?? []).filter((marker) => !counters.value.some((counter) => counter.id === marker.id))
+  if (fresh.length) counters.value = [...counters.value, ...fresh.map((marker) => ({ ...marker }))]
 }
 watch([phase, () => turnInfo.value.step, () => turnInfo.value.activeSideKey, isReplaying], () => nextTick(playEngineStep))
 
@@ -3261,13 +3488,30 @@ function searchMarker(result, unit, hidden) {
   const look = moduleRules.searchResults?.[hidden ? 'hidden' : result]
   return { id: `search-${newUid()}`, name: look?.name ?? result, code: look?.name ?? result, type: 'marker',
     faction: 'markers', src: look?.src, col: unit.col, row: unit.row, searchResult: result, attachedTo: String(unit.id),
-    step: turnTrackerRef.value?.currentStep ?? null }
+    step: turnTrackerRef.value?.currentStep ?? null, ...placedWhen() }
+}
+
+/** Tour (et heure de la piste) où un pion de repérage est posé — montré
+ *  au survol de la pile (cf. `hoveredStackCounters`). */
+function placedWhen() {
+  return { placedTurn: turnInfo.value.turn, placedTime: turnTrackerRef.value?.currentTurnInfo?.time ?? null }
+}
+
+/** Les vraies task forces du camp du joueur (`manualReconSide`) gardent
+ *  leur pion une fois repérées, et empilent TOUS les pions de repérage
+ *  posés sur elles (résultats de recherche et "Sighted") jusqu'à leur
+ *  retour dans la tasse. Les autres unités n'en portent qu'un de chaque, et
+ *  leur "Sighted" remplace leur image (cf. `unitSrc`). */
+function keepsOwnLook(unit) {
+  return !!unit && unit.faction === moduleRules.manualReconSide && unit.code !== 'Dummy'
 }
 
 /** Pose le résultat de recherche `marker` sur son unité, à la place de
- *  celui d'une phase précédente — en jeu comme au rejeu. */
+ *  celui d'une phase précédente (sauf sur une unité qui les empile, cf.
+ *  `keepsOwnLook`) — en jeu comme au rejeu. */
 function placeSearchMarker(marker) {
-  counters.value = [...counters.value.filter((counter) => !(counter.searchResult && counter.attachedTo === marker.attachedTo)), { ...marker }]
+  const stacks = keepsOwnLook(counters.value.find((counter) => String(counter.id) === marker.attachedTo))
+  counters.value = [...counters.value.filter((counter) => stacks || !(counter.searchResult && counter.attachedTo === marker.attachedTo)), { ...marker }]
 }
 
 /** Pion "Sighted" de l'état de repérage `sighting`, posé sur l'unité `unit`
@@ -3278,7 +3522,7 @@ function sightedMarker(sighting, unit) {
   const src = look?.src?.[unit.faction] ?? Object.values(look?.src ?? {})[0]
   if (!src) return null
   return { id: `sighted-${newUid()}`, name: look.name, code: look.name, type: 'marker', faction: 'markers',
-    src, col: unit.col, row: unit.row, sighted: sighting, attachedTo: String(unit.id) }
+    src, col: unit.col, row: unit.row, sighted: sighting, attachedTo: String(unit.id), ...placedWhen() }
 }
 
 // État de repérage de chaque unité explorée (cf. `moduleRules.searchOutcome`)
@@ -3287,12 +3531,30 @@ function sightedMarker(sighting, unit) {
 const sightings = ref(new Map())
 
 /** Enregistre l'état de repérage d'une unité et remplace son pion
- *  "Sighted" — en jeu comme au rejeu. */
+ *  "Sighted" (ou l'empile, cf. `keepsOwnLook`) — en jeu comme au rejeu. */
 function applySighting(unitId, sighting, sighted) {
   const key = String(unitId)
   sightings.value = new Map(sightings.value).set(key, sighting)
-  counters.value = counters.value.filter((counter) => !(counter.sighted && counter.attachedTo === key))
+  const stacks = keepsOwnLook(counters.value.find((counter) => String(counter.id) === key))
+  if (!stacks) counters.value = counters.value.filter((counter) => !(counter.sighted && counter.attachedTo === key))
   if (sighted) counters.value.push({ ...sighted })
+}
+
+/** Pions "Sighted" qui REMPLACENT à l'affichage l'image de leur unité
+ *  (drapeau du leurre, ou pion de la task force), sans changer l'unité
+ *  elle-même : unité id -> pion. Pas ceux des unités qui gardent leur pion
+ *  (cf. `keepsOwnLook`), rendus, eux, sur la pile. */
+const replacingSighted = computed(() => {
+  const byId = new Map(counters.value.map((counter) => [String(counter.id), counter]))
+  return new Map(counters.value.filter((counter) => counter.sighted && counter.attachedTo && !keepsOwnLook(byId.get(counter.attachedTo)))
+    .map((counter) => [counter.attachedTo, counter]))
+})
+const replacesUnitImage = (marker) => replacingSighted.value.get(marker.attachedTo)?.id === marker.id
+
+/** Image affichée d'une unité : celle de son pion "Sighted" s'il la
+ *  remplace, sinon la sienne. */
+function unitSrc(counter) {
+  return replacingSighted.value.get(String(counter.id))?.src ?? counter.src
 }
 
 // Toast du résultat d'une reconnaissance du joueur (cf. Toast.vue).
@@ -3362,15 +3624,70 @@ watch(() => counters.value.filter((counter) => counter.attachedTo).map((marker) 
 
 // Tours où les chits de recherche reviennent tous dans la tasse (piste de
 // tour, cf. `moduleRules.searchChitsReturn`) : leurs pions quittent la
-// carte. Déduit du seul tour : vaut aussi au rejeu, sans entrée de journal.
-watch(() => turnInfo.value.turn, () => {
-  if (!moduleRules.searchChitsReturn(turnTrackerRef.value?.currentTurnInfo)) return
+// carte, et le journal dit combien de chits de chaque sorte sont rentrés
+// (entrée `searchRefill`). Les repérages tombent avec eux : pions "Sighted"
+// retirés, les unités repérées retrouvent leur image (drapeau pour un
+// leurre). Le retour lui-même se déduit du seul tour : il vaut aussi au
+// rejeu, où l'entrée n'est pas réinscrite. En ligne, seul le navigateur qui
+// a fait avancer le tour l'inscrit (cf. onTurnChange).
+function returnSearchChits() {
   moduleRules.refillSearchBag()
-  if (counters.value.some((counter) => counter.searchResult)) counters.value = counters.value.filter((counter) => !counter.searchResult)
+  if (counters.value.some((counter) => counter.searchResult || counter.sighted)) {
+    counters.value = counters.value.filter((counter) => !counter.searchResult && !counter.sighted)
+  }
+  if (sightings.value.size) sightings.value = new Map()
+}
+watch(() => turnInfo.value.turn, () => {
+  // Pions de raid du tour précédent (cf. `runEngineRaid`) : retirés.
+  if (counters.value.some((counter) => counter.raid)) counters.value = counters.value.filter((counter) => !counter.raid)
+  // Avant le retour des chits : le renfort se pose d'après les repérages
+  // du jour, qui tombent avec eux.
+  reinforceDummies()
+  if (!moduleRules.searchChitsReturn(turnTrackerRef.value?.currentTurnInfo)) return
+  const full = moduleRules.searchBagFull ?? {}
+  const bag = moduleRules.searchBag?.value ?? {}
+  const returned = Object.fromEntries(Object.entries(full).map(([key, count]) => [key, count - (bag[key] ?? 0)]))
+  const total = Object.values(returned).reduce((sum, count) => sum + count, 0)
+  returnSearchChits()
+  if (!total || isReplaying.value || (props.online && turnInfo.value.step !== localTurnStep)) return
+  const { detected = 0, misdirect = 0, contactLost = 0 } = returned
+  log('searchRefill', t('log.searchRefill', { total, detected, misdirect, contactLost }, total), { returned })
 })
 
+// --- Renfort de leurres (premier tour de chaque nuit à la mer de Corail,
+// cf. `moduleRules.planDummyReinforcement`) : les leurres éliminés
+// reviennent sur la carte, SUR les hex des task forces repérées, qu'ils
+// suivront désormais (ils s'en écartent à leur mouvement, cf.
+// `runAutoMoves`). Tiré au hasard, donc tiré UNE fois — par le
+// navigateur qui a fait avancer le tour — et inscrit au journal (entrée
+// `dummyReinforce`), d'où le rejeu et les autres joueurs le reprennent.
+function reinforceDummies() {
+  if (!moduleRules.dummyReinforcementTurn(turnTrackerRef.value?.currentTurnInfo)) return
+  if (isReplaying.value || (props.online && turnInfo.value.step !== localTurnStep)) return
+  const freeIds = [...eliminatedIds.value].filter((id) => moduleRules.isReusableDummy(counterDefinition(id)))
+  const plan = moduleRules.planDummyReinforcement(counters.value, sightings.value, freeIds)
+  if (!plan) return
+  applyDummyReinforcement(plan)
+  const hexes = [...new Set(plan.placements.map((placement) => hexId(placement.col + 1, placement.row)))].join(', ')
+  log('dummyReinforce', t('log.dummyReinforce', { n: plan.placements.length, hexes }, plan.placements.length), plan)
+}
+
+/** Pose les leurres d'un renfort — en jeu comme au rejeu. */
+function applyDummyReinforcement(plan) {
+  moduleRules.applyDummyReinforcement(plan)
+  const back = new Set(eliminatedIds.value)
+  for (const { id, col, row } of plan.placements ?? []) {
+    back.delete(String(id))
+    const definition = counterDefinition(id)
+    if (definition && !counters.value.some((counter) => String(counter.id) === String(id))) {
+      counters.value.push({ ...withMapExit(definition), col, row })
+    }
+  }
+  eliminatedIds.value = back
+}
+
 // --- Ordre tiré au dé (piste à phases entremêlées, phase `"order": "roll"`
-// — cf. lib/turnTrack.js ; le Combat naval de la mer de Corail) : en
+// — cf. lib/turnTrack.js ; les Opérations aériennes de la mer de Corail) : en
 // arrivant sur le premier créneau de cette phase, chaque camp lance un dé,
 // le plus FAIBLE joue en premier, on relance en cas d'égalité. Le résultat
 // part au journal (entrée `rollOrder`), d'où le rejeu et les autres joueurs
@@ -3543,7 +3860,7 @@ function onMapDrop(ev) {
     const reinforcement = allCounters.value.find((counter) => String(counter.id) === String(draggedCounterId.value))
     // Mode Assisté (mise en place) : camp actif, et phase qui l'autorise.
     const allowed = reinforcement && canEnterThisTurn(reinforcement)
-      && (!props.assisted || (canControl(reinforcement) && canPlaceReinforcementNow(reinforcement)))
+      && (!props.assisted || (canControl(reinforcement) && canPlaceNow(reinforcement)))
     if (allowed) {
       const placed = { ...withMapExit(instanceOf(reinforcement)), ...hex }
       counters.value.push(placed)
@@ -3790,7 +4107,7 @@ function applyReplayEntry(entry) {
     }
     if (entry.kind === 'place') {
       // Mémoire "a atterri ce tour-ci" des règles du module (cf.
-      // lib/useArnhem.js::noteAirborneArrival) : à rétablir, sinon un
+      // lib/moduleRules.js::noteAirborneArrival) : à rétablir, sinon un
       // "Annuler le mouvement" fait APRÈS le rejeu rendrait à l'aéroporté
       // son allocation pleine. Les MP dépensés, eux, ne sont PAS recalculés
       // ici : c'est la valeur du journal, juste en dessous, qui fait foi.
@@ -3879,6 +4196,15 @@ function applyReplayEntry(entry) {
     // État de repérage et pion "Sighted" (le leurre démasqué, lui, part
     // avec l'entrée `eliminate` qui suit).
     if (entryData.unitId && entryData.sighting) applySighting(entryData.unitId, entryData.sighting, entryData.sighted)
+  } else if (entry.kind === 'searchRefill') {
+    // Retour des chits de recherche dans la tasse (cf. `returnSearchChits`).
+    returnSearchChits()
+  } else if (entry.kind === 'raid') {
+    // Raid aérien du moteur (cf. `runEngineRaid`).
+    placeRaidMarkers(entryData.markers)
+  } else if (entry.kind === 'dummyReinforce') {
+    // Renfort de leurres (cf. `reinforceDummies`) : le journal fait foi.
+    applyDummyReinforcement(entryData)
   } else if (entry.kind === 'rollOrder') {
     // Ordre de jeu d'une phase tirée au dé (cf. `rollPhaseOrder`).
     turnTrackerRef.value?.setRollOrder(entryData.turn, entryData.order)
@@ -4446,7 +4772,7 @@ function onMapDragEnd() {
             :row="counter.row" :calibration="calibration" :selected="selectedCounterId === counter.id" :selectable="false"
             :offset="stackOffsets.get(counter.id) ?? ZERO_OFFSET" :drag-px="draggedCounterId === counter.id ? dragCurrentPx : null"
             @dragstart="onCounterDragStart" @hex-click="onMarkerClick" @hover="onCounterHover" @unhover="onCounterUnhover" />
-          <Counter v-for="counter in counters.filter(isUnit)" :key="counter.id" :id="counter.id" :src="counter.src" :col="counter.col"
+          <Counter v-for="counter in counters.filter(isUnit)" :key="counter.id" :id="counter.id" :src="unitSrc(counter)" :col="counter.col"
             :row="counter.row" :calibration="calibration" :selected="selectedCounterId === counter.id" :selectable="selectable"
             :moved="showMovedRings && movedThisTurnIds.has(String(counter.id))" :spent="hasFought(counter)"
             :disrupted="artillery.isDisrupted(counter)" :displaced="artillery.isDisplaced(counter)"
@@ -4454,10 +4780,11 @@ function onMapDragEnd() {
             :offset="stackOffsets.get(counter.id) ?? ZERO_OFFSET" :drag-px="draggedCounterId === counter.id ? dragCurrentPx : null"
             @select="onCounterSelect" @dragstart="onCounterDragStart" @contextmenu="onCounterContextMenu"
             @hover="onCounterHover" @unhover="onCounterUnhover" />
-          <!-- Résultats de recherche et pions "Sighted" (cf. `reportRecon`) :
-               posés SUR la pile qu'ils renseignent, transparents aux clics
-               (cf. `syncSearchMarkers`). -->
-          <Counter v-for="counter in counters.filter((counter) => counter.attachedTo)" :key="counter.id" :id="counter.id" :src="counter.src" :col="counter.col"
+          <!-- Résultats de recherche (cf. `reportRecon`) : posés SUR la pile
+               qu'ils renseignent, transparents aux clics (cf.
+               `syncSearchMarkers`). Les pions "Sighted" qui remplacent
+               l'image de leur unité n'y sont pas (cf. `unitSrc`). -->
+          <Counter v-for="counter in counters.filter((counter) => counter.attachedTo && !replacesUnitImage(counter))" :key="counter.id" :id="counter.id" :src="counter.src" :col="counter.col"
             :row="counter.row" :calibration="calibration" :selected="false" :selectable="false"
             :offset="stackOffsets.get(counter.id) ?? ZERO_OFFSET" class="search-marker" />
           <!-- Pions de soutien rendus en dernier : toujours au-dessus des
@@ -4485,12 +4812,14 @@ function onMapDragEnd() {
       <template v-for="tab in sidePanelTabs" :key="tab.key" v-slot:[tab.key]>
         <EliminatedPanel v-if="tab.key === 'eliminated'" :units="eliminatedCounters"
           @contextmenu="onEliminatedContextMenu" />
+        <SearchBagPanel v-else-if="tab.key === 'searchBag'" :bag="moduleRules.searchBag.value"
+          :full="moduleRules.searchBagFull ?? {}" :looks="moduleRules.searchResults ?? {}" />
         <JournalPanel v-else-if="tab.key === 'journal'" ref="journalRef" :module-id="moduleId || module.name"
           :turn="turnInfo.turn" :settings="settings" :shared="online" @loaded="onJournalLoaded"
           @settings-mismatch="(settings) => emit('restart-with', settings)" />
         <ReinforcementsPanel v-else :reinforcements="reinforcementsForTab(tab.key)"
           :selected-id="selectedReinforcementId" :current-turn="turnInfo.turn" :draggable="draggable || phase === PHASE_SETUP"
-          :can-place="canPlaceReinforcementNow"
+          :can-place="canPlaceNow"
           @dragstart="onCounterDragStart" @select="onReinforcementSelect" />
       </template>
     </SidePanel>
@@ -4526,6 +4855,14 @@ function onMapDragEnd() {
     <BugReportModal v-if="bugReport" :snapshot="bugReport.snapshot" :game="bugReport.game" :context="bugReport.context" @close="bugReport = null" />
 
     <PhaseBlockedModal v-if="showPhaseBlocked" v-bind="phaseBlockedView" @close="showPhaseBlocked = false" />
+    <PhaseBlockedModal v-if="reconSkipPending" :title="$t('recon.skipTitle')" :confirm-label="$t('recon.skipConfirm')"
+      @close="reconSkipPending = null" @confirm="confirmReconSkip">
+      {{ $t('recon.skipMessage', { n: reconSkipPending }, reconSkipPending) }}
+    </PhaseBlockedModal>
+    <PhaseBlockedModal v-if="noMovePending" :title="$t('noMove.title')" :confirm-label="$t('noMove.confirm')"
+      @close="noMovePending = false" @confirm="confirmNoMove">
+      {{ $t('noMove.message') }}
+    </PhaseBlockedModal>
 
     <!-- cf. lib/useBridges.js — un pont démolissable est bordé par une
          unité ennemie : au camp qui le tient de décider, tout de suite. -->

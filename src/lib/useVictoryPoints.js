@@ -9,11 +9,11 @@
 //   - mode ASSISTÉ : le moteur les attribue, d'après ce que le module déclare
 //     (`rules.victoryPoints`, cf. lib/rules.js::resolveVictoryPoints).
 //
-// ─── CE QUI RAPPORTE (Arnhem) ────────────────────────────────────────────────
+// ─── CE QUI RAPPORTE (exemple) ──────────────────────────────────────────────
 //   - une unité ÉLIMINÉE rapporte à son adversaire : 1 point à l'Allié par
 //     unité allemande, 5 points à l'Allemand par unité alliée. Une unité qui
 //     se reconstitue et revient en renfort (le génie, cf.
-//     lib/useArnhem.js::rebuiltReinforcement) n'a jamais été perdue : elle ne
+//     lib/moduleRules.js::rebuiltReinforcement) n'a jamais été perdue : elle ne
 //     rapporte rien ;
 //   - à chaque FIN DE TOUR, l'Allié marque pour chaque unité non aéroportée
 //     qui tient une position au-delà d'un fleuve ET trace une ligne de
@@ -28,7 +28,7 @@
 // ─── COMMENT UNE ZONE EST DÉLIMITÉE ──────────────────────────────────────────
 // « À droite de la Waal » ne se décrit ni par une ligne droite ni par une
 // liste d'hex : c'est la région que le fleuve ISOLE. On part d'un hex témoin
-// déclaré par le module (`zones[].seed` — 3005 pour l'Île, 3706 pour Arnhem)
+// déclaré par le module (`zones[].seed`, ex. 3005)
 // et on remplit de proche en proche SANS JAMAIS franchir une arête de
 // rivière, ponts compris : un pont fait passer des hommes, il ne déplace pas
 // la rive. La zone épouse ainsi le tracé imprimé, méandres compris, et suit
@@ -52,7 +52,7 @@
 // (`victory.outcome`, cf. lib/rules.js::resolveOutcome) : on divise les
 // points d'un camp par ceux de l'autre, et le rapport obtenu, arrondi au
 // centième (la table se lit au centième : 2,01, 1,99...), tombe dans un
-// palier. Arnhem compare Allemands contre Alliés :
+// palier. Ex. Allemands contre Alliés :
 //   - 3,00 contre 1 ou plus  → victoire stratégique allemande ;
 //   - de 2,01 à 2,99         → victoire tactique allemande ;
 //   - exactement 2,00        → match nul ;

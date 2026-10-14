@@ -6,11 +6,11 @@
 // d'un module") sous l'une de quatre formes :
 //   - "CCRR"       : cet hex précis (col/ligne imprimées, 1-based) ;
 //   - "CCRR-CCRR"  : une plage de bord de carte — tous les hex "sur ou entre"
-//                    les deux bornes (ex. renforts allemands d'Arnhem), en
+//                    les deux bornes (ex. leurres japonais de Coral Sea), en
 //                    suivant le bord réel quand une colonne sur deux
 //                    s'arrête plus haut (cf. `rangeCells`) ;
 //   - "CCRR+adj"   : un LARGAGE — l'hex de référence ou l'un de ses 6 voisins
-//                    (ex. chaque unité alliée d'Arnhem près de sa zone de
+//                    (ex. une unité aéroportée près de sa zone de
 //                    largage). C'est ce suffixe, et lui seul, qui fait d'un
 //                    pion un AÉROPORTÉ pour tout le moteur (phase Airborne,
 //                    coût d'entrée, règles particulières du module...) ;
@@ -53,7 +53,7 @@ export function isAirborneEntry(counter) {
  *  Une plage est une BANDE DE BORD, et un bord de carte hexagonale n'est pas
  *  toujours une ligne bien droite : sur une grille à colonnes décalées (cf.
  *  lib/mapShape.js, `map.evenColMinus`), une colonne sur deux s'arrête une
- *  ligne plus haut — le bord bas d'Arnhem est ainsi 0126, 0225, 0326, 0425...
+ *  ligne plus haut — un bord bas est ainsi 0126, 0225, 0326, 0425...
  *  Une plage déclarée "0126-2726" doit donc suivre ce bord, pas s'évaporer
  *  une colonne sur deux : quand l'hex de la ligne déclarée n'existe pas dans
  *  cette colonne ET que la colonne s'arrête juste au-dessus, on prend cet hex

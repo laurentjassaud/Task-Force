@@ -15,7 +15,7 @@
 //
 // ─── ADJACENCE ("AU CONTACT") ────────────────────────────────────────────────
 // Deux hex voisins ne sont PAS adjacents au sens du combat quand l'hexside
-// qui les sépare interdit l'attaque (rivière sans pont pour Arnhem, cf.
+// qui les sépare interdit l'attaque (ex. rivière sans pont, cf.
 // useAssisted.js::edgeBlocksAttack). Une unité est "AU CONTACT" si elle est
 // adjacente, en ce sens, à au moins une unité ennemie (cf. `inContact`).
 //
@@ -73,7 +73,7 @@
 //   - `moduleRules` : règles PARTICULIÈRES au module joué (cf.
 //     lib/moduleRules.js), dont ce fichier n'utilise que `engineerAssaultEdge`
 //     — un hexside que le combat fermerait, mais qu'une règle du module
-//     ouvre à telle unité (la passerelle du génie d'Arnhem, cf.
+//     ouvre à telle unité (ex. une passerelle du génie, cf.
 //     `adjacentForCombat`).
 import { ref, watch } from 'vue'
 import { hexDistance, neighborsOf } from './hex.js'
@@ -106,8 +106,8 @@ export function useArtillery({ phase, step, counters, isEnemyOf, edgeBlocksAttac
    *  voisins, et pas séparés par un hexside qui interdit l'attaque ?
    *
    *  Une règle du module peut ouvrir cet hexside-là à cette unité-là (cf.
-   *  `moduleRules.engineerAssaultEdge` et lib/useArnhem.js : la passerelle du
-   *  génie change la rivière en ruisseau pour l'aéroporté qui l'emprunte).
+   *  `moduleRules.engineerAssaultEdge` : ex. une passerelle du génie qui
+   *  change la rivière en ruisseau pour l'unité qui l'emprunte).
    *  `positionA` est alors l'unité qui attaque — c'est toujours un pion que
    *  les appelants passent ici, jamais une position nue. */
   function adjacentForCombat(positionA, positionB) {
